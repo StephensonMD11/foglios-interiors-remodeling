@@ -30,9 +30,15 @@ export type ProposalLineItem = {
 
 export type Proposal = {
   id: string;
-  publicId: string;
+  /** Active public share token; null/empty when no share is open. */
+  publicId: string | null;
+  /** ISO timestamp when the public link stops working. */
+  shareExpiresAt: string | null;
   clientName: string;
+  /** Admin-only — never shown on the public / printable proposal. */
   clientAddress: string;
+  /** Admin-only — never shown on the public / printable proposal. */
+  clientPhone: string;
   projectTitle: string;
   notes: string;
   lineItems: ProposalLineItem[];

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
 import { newId, readStore, writeStore } from "@/lib/content";
+import {
+  newProposalPublicId,
+  shareExpiryIso,
+} from "@/lib/proposal-share";
 import type { Proposal, ProposalLineItem } from "@/lib/types";
 
 function normalizeItems(items: ProposalLineItem[] | undefined): ProposalLineItem[] {
@@ -30,9 +34,12 @@ export async function POST(request: Request) {
   const now = new Date().toISOString();
   const proposal: Proposal = {
     id: newId("prop"),
-    publicId: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
+    // No public link until Copy / Share / Email opens a 7-day share.
+    publicId: null,
+    shareExpiresAt: null,
     clientName: body.clientName?.trim() || "Client",
     clientAddress: body.clientAddress?.trim() || "",
+    clientPhone: body.clientPhone?.trim() || "",
     projectTitle: body.projectTitle?.trim() || "Project proposal",
     notes: body.notes?.trim() || "",
     lineItems: normalizeItems(body.lineItems),
@@ -52,7 +59,10 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as Partial<Proposal> & { id: string };
+  const body = (await request.json()) as Partial<Proposal> & {
+    id: string;
+    refreshShare?: boolean;
+  };
   const store = await readStore();
   const idx = store.proposals.findIndex((p) => p.id === body.id);
   if (idx < 0) {
@@ -60,6 +70,20 @@ export async function PUT(request: Request) {
   }
 
   const current = store.proposals[idx];
+  const now = new Date().toISOString();
+
+  if (body.refreshShare) {
+    store.proposals[idx] = {
+      ...current,
+      publicId: newProposalPublicId(),
+      shareExpiresAt: shareExpiryIso(),
+      status: "sent",
+      updatedAt: now,
+    };
+    await writeStore(store);
+    return NextResponse.json({ proposal: store.proposals[idx] });
+  }
+
   store.proposals[idx] = {
     ...current,
     clientName: body.clientName?.trim() || current.clientName,
@@ -67,14 +91,23 @@ export async function PUT(request: Request) {
       body.clientAddress === undefined
         ? current.clientAddress
         : body.clientAddress.trim(),
+    clientPhone:
+      body.clientPhone === undefined
+        ? current.clientPhone
+        : body.clientPhone.trim(),
     projectTitle: body.projectTitle?.trim() || current.projectTitle,
     notes: body.notes === undefined ? current.notes : body.notes.trim(),
     lineItems:
       body.lineItems === undefined
         ? current.lineItems
         : normalizeItems(body.lineItems),
-    status: body.status === "sent" ? "sent" : body.status === "draft" ? "draft" : current.status,
-    updatedAt: new Date().toISOString(),
+    status:
+      body.status === "sent"
+        ? "sent"
+        : body.status === "draft"
+          ? "draft"
+          : current.status,
+    updatedAt: now,
   };
 
   await writeStore(store);

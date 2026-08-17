@@ -5,6 +5,11 @@ import type { Project, Proposal, ProposalLineItem, Testimonial } from "@/lib/typ
 import { formatCurrency } from "@/lib/content-client";
 import { LINE_CATEGORIES } from "@/lib/proposal-categories";
 import { AdminTip } from "@/components/AdminTip";
+import {
+  formatShareExpiry,
+  isShareActive,
+  PROPOSAL_SHARE_DAYS,
+} from "@/lib/proposal-share";
 
 type Tab = "projects" | "testimonials" | "proposals";
 
@@ -77,6 +82,7 @@ export function AdminDashboard({
   const [proposalForm, setProposalForm] = useState({
     clientName: "",
     clientAddress: "",
+    clientPhone: "",
     projectTitle: "",
     notes: "",
     lineItems: [newLine()],
@@ -247,23 +253,28 @@ export function AdminDashboard({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not save proposal");
-      setProposals((list) => [data.proposal, ...list]);
       setProposalForm({
         clientName: "",
         clientAddress: "",
+        clientPhone: "",
         projectTitle: "",
         notes: "",
         lineItems: [newLine()],
         status: "draft",
       });
-      const url = proposalUrl(data.proposal.publicId);
+      // Open a fresh 7-day share and copy it — proposal stays in admin forever.
+      const shared = await refreshProposalShare(data.proposal.id);
+      setProposals((list) => [shared, ...list]);
+      const url = proposalUrl(shared.publicId!);
       try {
         await navigator.clipboard.writeText(url);
         setMessage(
-          "Proposal saved and link copied — text or email it to the customer.",
+          `Proposal saved. 7-day link copied — expires ${formatShareExpiry(shared.shareExpiresAt!)}.`,
         );
       } catch {
-        setMessage(`Proposal saved. Share link: ${url}`);
+        setMessage(
+          `Proposal saved. Share link (expires ${formatShareExpiry(shared.shareExpiresAt!)}): ${url}`,
+        );
       }
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Save failed");
@@ -280,32 +291,121 @@ export function AdminDashboard({
     if (res.ok) setProposals((list) => list.filter((p) => p.id !== id));
   }
 
-  async function copyProposalLink(publicId: string) {
-    const url = proposalUrl(publicId);
+  /** Creates a new public URL and starts a fresh 7-day window (old links die). */
+  async function refreshProposalShare(id: string) {
+    const res = await fetch("/api/admin/proposals", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, refreshShare: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not create share link");
+    return data.proposal as Proposal;
+  }
+
+  function upsertProposal(proposal: Proposal) {
+    setProposals((list) =>
+      list.map((p) => (p.id === proposal.id ? proposal : p)),
+    );
+  }
+
+  async function copyProposalLink(proposal: Proposal) {
+    setBusy(true);
+    setMessage("");
     try {
-      await navigator.clipboard.writeText(url);
-      setMessage("Link copied — paste it into a text or email to the customer.");
-    } catch {
-      window.prompt("Copy this proposal link:", url);
+      const shared = await refreshProposalShare(proposal.id);
+      upsertProposal(shared);
+      const url = proposalUrl(shared.publicId!);
+      try {
+        await navigator.clipboard.writeText(url);
+        setMessage(
+          `New link copied — works until ${formatShareExpiry(shared.shareExpiresAt!)}. Old links stop working.`,
+        );
+      } catch {
+        window.prompt("Copy this proposal link:", url);
+      }
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not copy link");
+    } finally {
+      setBusy(false);
     }
   }
 
   async function shareProposal(proposal: Proposal) {
-    const url = proposalUrl(proposal.publicId);
-    if (typeof navigator.share === "function") {
-      try {
-        await navigator.share({
-          title: `Proposal — ${proposal.projectTitle}`,
-          text: `Proposal from Foglio's: ${proposal.projectTitle}`,
-          url,
-        });
-        setMessage("Shared.");
-        return;
-      } catch {
-        // Cancelled or unavailable — fall through to copy
+    setBusy(true);
+    setMessage("");
+    try {
+      const shared = await refreshProposalShare(proposal.id);
+      upsertProposal(shared);
+      const url = proposalUrl(shared.publicId!);
+      if (typeof navigator.share === "function") {
+        try {
+          await navigator.share({
+            title: `Proposal — ${shared.projectTitle}`,
+            text: `Proposal from Foglio's (link expires ${formatShareExpiry(shared.shareExpiresAt!)}): ${shared.projectTitle}`,
+            url,
+          });
+          setMessage(
+            `Shared — link works until ${formatShareExpiry(shared.shareExpiresAt!)}.`,
+          );
+          return;
+        } catch {
+          // Cancelled or unavailable — fall through to copy
+        }
       }
+      try {
+        await navigator.clipboard.writeText(url);
+        setMessage(
+          `New link copied — works until ${formatShareExpiry(shared.shareExpiresAt!)}.`,
+        );
+      } catch {
+        window.prompt("Copy this proposal link:", url);
+      }
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not share");
+    } finally {
+      setBusy(false);
     }
-    await copyProposalLink(proposal.publicId);
+  }
+
+  async function emailProposalLink(proposal: Proposal) {
+    setBusy(true);
+    setMessage("");
+    try {
+      const shared = await refreshProposalShare(proposal.id);
+      upsertProposal(shared);
+      const full = proposalUrl(shared.publicId!);
+      setMessage(
+        `Link ready until ${formatShareExpiry(shared.shareExpiresAt!)} — opening email…`,
+      );
+      window.location.href = `mailto:?subject=${encodeURIComponent(
+        `Proposal — ${shared.projectTitle}`,
+      )}&body=${encodeURIComponent(
+        `Here's your proposal from Foglio's Interiors & Remodeling.\nThis link works until ${formatShareExpiry(shared.shareExpiresAt!)}:\n\n${full}\n`,
+      )}`;
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not email link");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openProposalShare(proposal: Proposal) {
+    setBusy(true);
+    setMessage("");
+    try {
+      // Reuse an active link for preview; otherwise open a new 7-day share.
+      let shared = proposal;
+      if (!isShareActive(proposal)) {
+        shared = await refreshProposalShare(proposal.id);
+        upsertProposal(shared);
+      }
+      window.open(proposalUrl(shared.publicId!), "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not open proposal");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -636,21 +736,23 @@ export function AdminDashboard({
           <div className="mt-8 space-y-8">
             <AdminTip>
               <p>
-                Build a proposal with line items, save it, then send the
-                customer a link — no app signup needed. On your phone, use{" "}
-                <strong>Share</strong> to text it, or <strong>Copy link</strong>{" "}
-                and paste into Messages or email. They can open it and use Print
-                / save PDF on their end.
+                Build a proposal with line items and save it — it stays in your
+                admin forever. Job address and phone stay in this dashboard only
+                (for your records) and never appear on the printable / shared
+                proposal. Copy link, Share, or Email creates a{" "}
+                <strong>temporary public page</strong> that works for{" "}
+                {PROPOSAL_SHARE_DAYS} days, then turns itself off. Creating a
+                new link invalidates the old one.
               </p>
               <p>
-                Each saved proposal keeps a private web page that only people
-                with the link can open. Print/PDF still works from that page
-                too.
+                Open / print lets you preview (and share from that screen too).
+                On your phone, Share opens Messages so you can text the customer.
+                No extra apps or passwords needed.
               </p>
             </AdminTip>
             <div className="admin-card space-y-4">
               <h2 className="font-display text-2xl">New proposal</h2>
-              <div className="grid gap-3 lg:grid-cols-3">
+              <div className="grid gap-3 lg:grid-cols-2">
                 <input
                   className="admin-input"
                   placeholder="Client name"
@@ -660,8 +762,19 @@ export function AdminDashboard({
                   }
                 />
                 <input
+                  className="admin-input"
+                  placeholder="Phone (admin only — not on proposal)"
+                  value={proposalForm.clientPhone}
+                  onChange={(e) =>
+                    setProposalForm((f) => ({
+                      ...f,
+                      clientPhone: e.target.value,
+                    }))
+                  }
+                />
+                <input
                   className="admin-input lg:col-span-2"
-                  placeholder="Job address"
+                  placeholder="Job address (admin only — not on proposal)"
                   value={proposalForm.clientAddress}
                   onChange={(e) =>
                     setProposalForm((f) => ({
@@ -844,7 +957,7 @@ export function AdminDashboard({
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {proposals.map((proposal) => {
                     const total = proposalAmount(proposal);
-                    const url = `/p/${proposal.publicId}`;
+                    const active = isShareActive(proposal);
                     return (
                       <div key={proposal.id} className="admin-card">
                         <div className="flex justify-between gap-3">
@@ -855,8 +968,23 @@ export function AdminDashboard({
                             <p className="text-xs text-white/50">
                               {proposal.clientName}
                             </p>
+                            {(proposal.clientPhone || proposal.clientAddress) && (
+                              <div className="mt-2 space-y-0.5 text-xs text-white/55">
+                                {proposal.clientPhone ? (
+                                  <p>Phone: {proposal.clientPhone}</p>
+                                ) : null}
+                                {proposal.clientAddress ? (
+                                  <p>Job: {proposal.clientAddress}</p>
+                                ) : null}
+                              </div>
+                            )}
                             <p className="mt-2 text-sm font-semibold text-[color:var(--oak)]">
                               Total {formatCurrency(total)}
+                            </p>
+                            <p className="mt-1 text-xs text-white/45">
+                              {active
+                                ? `Public link active until ${formatShareExpiry(proposal.shareExpiresAt!)}`
+                                : "No public link right now — Copy / Share opens a 7-day link"}
                             </p>
                           </div>
                           <button
@@ -868,26 +996,26 @@ export function AdminDashboard({
                           </button>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2 text-sm">
-                          <a
+                          <button
+                            type="button"
                             className="text-[color:var(--oak)] underline"
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
+                            disabled={busy}
+                            onClick={() => openProposalShare(proposal)}
                           >
                             Open / print
-                          </a>
+                          </button>
                           <button
                             type="button"
                             className="underline text-white/70"
-                            onClick={() =>
-                              copyProposalLink(proposal.publicId)
-                            }
+                            disabled={busy}
+                            onClick={() => copyProposalLink(proposal)}
                           >
                             Copy link
                           </button>
                           <button
                             type="button"
                             className="underline text-white/70"
+                            disabled={busy}
                             onClick={() => shareProposal(proposal)}
                           >
                             Share
@@ -895,14 +1023,8 @@ export function AdminDashboard({
                           <button
                             type="button"
                             className="underline text-white/70"
-                            onClick={() => {
-                              const full = proposalUrl(proposal.publicId);
-                              window.location.href = `mailto:?subject=${encodeURIComponent(
-                                `Proposal — ${proposal.projectTitle}`,
-                              )}&body=${encodeURIComponent(
-                                `Here's your proposal from Foglio's Interiors & Remodeling:\n\n${full}\n`,
-                              )}`;
-                            }}
+                            disabled={busy}
+                            onClick={() => emailProposalLink(proposal)}
                           >
                             Email link
                           </button>

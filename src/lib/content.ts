@@ -95,11 +95,21 @@ async function streamToText(stream: ReadableStream<Uint8Array>) {
   return new Response(stream).text();
 }
 
+function normalizeProposal(proposal: Proposal): Proposal {
+  return {
+    ...proposal,
+    publicId: proposal.publicId || null,
+    shareExpiresAt: proposal.shareExpiresAt ?? null,
+    clientAddress: proposal.clientAddress ?? "",
+    clientPhone: proposal.clientPhone ?? "",
+  };
+}
+
 function normalizeStore(data: Partial<ContentStore>): ContentStore {
   return {
     projects: data.projects ?? [],
     testimonials: data.testimonials ?? [],
-    proposals: data.proposals ?? [],
+    proposals: (data.proposals ?? []).map(normalizeProposal),
   };
 }
 
@@ -185,8 +195,26 @@ export async function getPublishedTestimonials(): Promise<Testimonial[]> {
 export async function getProposalByPublicId(
   publicId: string,
 ): Promise<Proposal | null> {
+  if (!publicId) return null;
   const store = await readStore();
-  return store.proposals.find((p) => p.publicId === publicId) ?? null;
+  const idx = store.proposals.findIndex((p) => p.publicId === publicId);
+  if (idx < 0) return null;
+
+  const proposal = store.proposals[idx];
+  const expiresAt = proposal.shareExpiresAt;
+  if (!expiresAt || Date.parse(expiresAt) <= Date.now()) {
+    // Public link expired — clear it so the URL no longer resolves.
+    store.proposals[idx] = {
+      ...proposal,
+      publicId: null,
+      shareExpiresAt: null,
+      updatedAt: new Date().toISOString(),
+    };
+    await writeStore(store);
+    return null;
+  }
+
+  return proposal;
 }
 
 export function newId(prefix: string) {

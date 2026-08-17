@@ -41,7 +41,7 @@ export default async function ProposalPublicPage({ params }: Props) {
           <Link href="/" className="text-sm text-[color:var(--slate)]">
             ← {siteConfig.shortName}
           </Link>
-          <ProposalActions />
+          <ProposalActions expiresAt={proposal.shareExpiresAt} />
         </div>
       </div>
 
@@ -62,11 +62,6 @@ export default async function ProposalPublicPage({ params }: Props) {
               Prepared for
             </p>
             <p className="mt-2 text-lg font-semibold">{proposal.clientName}</p>
-            {proposal.clientAddress ? (
-              <p className="mt-1 text-[color:var(--slate)]">
-                {proposal.clientAddress}
-              </p>
-            ) : null}
           </div>
           <div>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
@@ -75,6 +70,12 @@ export default async function ProposalPublicPage({ params }: Props) {
             <p className="mt-2 text-lg font-semibold">{proposal.projectTitle}</p>
           </div>
         </div>
+
+        <p className="no-print mt-6 border border-[color:var(--line)] bg-[color:var(--paper)] px-4 py-3 text-sm text-[color:var(--slate)]">
+          This shared link auto-expires after 7 days for privacy. After it
+          expires, this page will no longer open. Print or save a PDF if you
+          want a lasting copy.
+        </p>
 
         <div className="mt-10 overflow-hidden border border-[color:var(--line)]">
           <table className="w-full text-left text-sm">
