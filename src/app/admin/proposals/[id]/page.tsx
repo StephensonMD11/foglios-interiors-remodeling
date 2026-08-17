@@ -11,6 +11,12 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  if (!(await isAuthenticated())) {
+    return {
+      title: "Proposal preview",
+      robots: { index: false, follow: false },
+    };
+  }
   const { id } = await params;
   const proposal = await getProposalById(id);
   return {

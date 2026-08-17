@@ -289,6 +289,40 @@ img {
   margin-top: 0.55rem;
 }
 
+.admin-collapse > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-collapse > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-collapse > summary::after {
+  content: "Show";
+  flex-shrink: 0;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(243, 241, 236, 0.45);
+}
+
+.admin-collapse[open] > summary::after {
+  content: "Hide";
+}
+
+.admin-collapse[open] > summary {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .prose-legal h2 {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.5rem;

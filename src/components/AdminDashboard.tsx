@@ -741,8 +741,101 @@ export function AdminDashboard({
                 Share opens Messages so you can text the customer.
               </p>
             </AdminTip>
-            <div className="admin-card space-y-4">
-              <h2 className="font-display text-2xl">New proposal</h2>
+
+            <div>
+              <h3 className="mb-3 font-display text-xl">Saved proposals</h3>
+              {proposals.length ? (
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {proposals.map((proposal) => {
+                    const total = proposalAmount(proposal);
+                    const active = isShareActive(proposal);
+                    return (
+                      <div key={proposal.id} className="admin-card">
+                        <div className="flex justify-between gap-3">
+                          <div>
+                            <p className="font-semibold">
+                              {proposal.projectTitle}
+                            </p>
+                            <p className="text-xs text-white/50">
+                              {proposal.clientName}
+                            </p>
+                            {(proposal.clientPhone || proposal.clientAddress) && (
+                              <div className="mt-2 space-y-0.5 text-xs text-white/55">
+                                {proposal.clientPhone ? (
+                                  <p>Phone: {proposal.clientPhone}</p>
+                                ) : null}
+                                {proposal.clientAddress ? (
+                                  <p>Job: {proposal.clientAddress}</p>
+                                ) : null}
+                              </div>
+                            )}
+                            <p className="mt-2 text-sm font-semibold text-[color:var(--oak)]">
+                              Total {formatCurrency(total)}
+                            </p>
+                            <p className="mt-1 text-xs text-white/45">
+                              {active
+                                ? `Public link active until ${formatShareExpiry(proposal.shareExpiresAt!)}`
+                                : "No public link right now — Copy / Share opens a 7-day link"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="text-xs text-red-300"
+                            onClick={() => deleteProposal(proposal.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2 text-sm">
+                          <button
+                            type="button"
+                            className="text-[color:var(--oak)] underline"
+                            disabled={busy}
+                            onClick={() => openProposalPreview(proposal)}
+                          >
+                            Preview
+                          </button>
+                          <button
+                            type="button"
+                            className="underline text-white/70"
+                            disabled={busy}
+                            onClick={() => copyProposalLink(proposal)}
+                          >
+                            Copy link
+                          </button>
+                          <button
+                            type="button"
+                            className="underline text-white/70"
+                            disabled={busy}
+                            onClick={() => shareProposal(proposal)}
+                          >
+                            Share
+                          </button>
+                          <button
+                            type="button"
+                            className="underline text-white/70"
+                            disabled={busy}
+                            onClick={() => emailProposalLink(proposal)}
+                          >
+                            Email link
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-white/50">
+                  No proposals yet — open New proposal below to create one.
+                </p>
+              )}
+            </div>
+
+            <details className="admin-card admin-collapse space-y-4">
+              <summary>
+                <h2 className="font-display text-2xl">New proposal</h2>
+              </summary>
+              <div className="space-y-4">
               <div className="grid gap-3 lg:grid-cols-2">
                 <input
                   className="admin-input"
@@ -940,96 +1033,8 @@ export function AdminDashboard({
               >
                 Save proposal
               </button>
-            </div>
-
-            <div>
-              <h3 className="mb-3 font-display text-xl">Saved proposals</h3>
-              {proposals.length ? (
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {proposals.map((proposal) => {
-                    const total = proposalAmount(proposal);
-                    const active = isShareActive(proposal);
-                    return (
-                      <div key={proposal.id} className="admin-card">
-                        <div className="flex justify-between gap-3">
-                          <div>
-                            <p className="font-semibold">
-                              {proposal.projectTitle}
-                            </p>
-                            <p className="text-xs text-white/50">
-                              {proposal.clientName}
-                            </p>
-                            {(proposal.clientPhone || proposal.clientAddress) && (
-                              <div className="mt-2 space-y-0.5 text-xs text-white/55">
-                                {proposal.clientPhone ? (
-                                  <p>Phone: {proposal.clientPhone}</p>
-                                ) : null}
-                                {proposal.clientAddress ? (
-                                  <p>Job: {proposal.clientAddress}</p>
-                                ) : null}
-                              </div>
-                            )}
-                            <p className="mt-2 text-sm font-semibold text-[color:var(--oak)]">
-                              Total {formatCurrency(total)}
-                            </p>
-                            <p className="mt-1 text-xs text-white/45">
-                              {active
-                                ? `Public link active until ${formatShareExpiry(proposal.shareExpiresAt!)}`
-                                : "No public link right now — Copy / Share opens a 7-day link"}
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            className="text-xs text-red-300"
-                            onClick={() => deleteProposal(proposal.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2 text-sm">
-                          <button
-                            type="button"
-                            className="text-[color:var(--oak)] underline"
-                            disabled={busy}
-                            onClick={() => openProposalPreview(proposal)}
-                          >
-                            Preview
-                          </button>
-                          <button
-                            type="button"
-                            className="underline text-white/70"
-                            disabled={busy}
-                            onClick={() => copyProposalLink(proposal)}
-                          >
-                            Copy link
-                          </button>
-                          <button
-                            type="button"
-                            className="underline text-white/70"
-                            disabled={busy}
-                            onClick={() => shareProposal(proposal)}
-                          >
-                            Share
-                          </button>
-                          <button
-                            type="button"
-                            className="underline text-white/70"
-                            disabled={busy}
-                            onClick={() => emailProposalLink(proposal)}
-                          >
-                            Email link
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-sm text-white/50">
-                  No proposals yet — save one above to get a shareable link.
-                </p>
-              )}
-            </div>
+              </div>
+            </details>
           </div>
         ) : null}
       </div>
