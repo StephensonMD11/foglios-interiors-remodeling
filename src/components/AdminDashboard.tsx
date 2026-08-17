@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import type { Project, Proposal, ProposalLineItem, Testimonial } from "@/lib/types";
 import { formatCurrency } from "@/lib/content-client";
 import { LINE_CATEGORIES } from "@/lib/proposal-categories";
+import { AdminTip } from "@/components/AdminTip";
 
 type Tab = "projects" | "testimonials" | "proposals";
 
@@ -25,6 +26,18 @@ function patchLine(
   const next = [...items];
   next[index] = { ...next[index], ...patch };
   return next;
+}
+
+function proposalUrl(publicId: string) {
+  if (typeof window === "undefined") return `/p/${publicId}`;
+  return `${window.location.origin}/p/${publicId}`;
+}
+
+function proposalAmount(proposal: Proposal) {
+  return proposal.lineItems.reduce(
+    (sum, item) => sum + item.quantity * item.unitPrice,
+    0,
+  );
 }
 
 export function AdminDashboard({
@@ -243,7 +256,15 @@ export function AdminDashboard({
         lineItems: [newLine()],
         status: "draft",
       });
-      setMessage(`Proposal saved. Share link: /p/${data.proposal.publicId}`);
+      const url = proposalUrl(data.proposal.publicId);
+      try {
+        await navigator.clipboard.writeText(url);
+        setMessage(
+          "Proposal saved and link copied — text or email it to the customer.",
+        );
+      } catch {
+        setMessage(`Proposal saved. Share link: ${url}`);
+      }
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -257,6 +278,34 @@ export function AdminDashboard({
       method: "DELETE",
     });
     if (res.ok) setProposals((list) => list.filter((p) => p.id !== id));
+  }
+
+  async function copyProposalLink(publicId: string) {
+    const url = proposalUrl(publicId);
+    try {
+      await navigator.clipboard.writeText(url);
+      setMessage("Link copied — paste it into a text or email to the customer.");
+    } catch {
+      window.prompt("Copy this proposal link:", url);
+    }
+  }
+
+  async function shareProposal(proposal: Proposal) {
+    const url = proposalUrl(proposal.publicId);
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: `Proposal — ${proposal.projectTitle}`,
+          text: `Proposal from Foglio's: ${proposal.projectTitle}`,
+          url,
+        });
+        setMessage("Shared.");
+        return;
+      } catch {
+        // Cancelled or unavailable — fall through to copy
+      }
+    }
+    await copyProposalLink(proposal.publicId);
   }
 
   return (
@@ -300,7 +349,20 @@ export function AdminDashboard({
         ) : null}
 
         {tab === "projects" ? (
-          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1fr]">
+          <div className="mt-8 space-y-6">
+            <AdminTip>
+              <p>
+                Projects are the photo galleries on the public site. Upload
+                before/after or finished-job photos, write a short caption, and
+                turn on <strong>Published</strong> so they show under Projects.
+              </p>
+              <p>
+                Mark one or two as <strong>Featured</strong> to highlight them
+                on the homepage. You can add more photos later from a saved
+                project card.
+              </p>
+            </AdminTip>
+            <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
             <div className="admin-card space-y-3">
               <h2 className="font-display text-2xl">Add project</h2>
               <input
@@ -492,11 +554,25 @@ export function AdminDashboard({
                 </div>
               ))}
             </div>
+            </div>
           </div>
         ) : null}
 
         {tab === "testimonials" ? (
-          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1fr]">
+          <div className="mt-8 space-y-6">
+            <AdminTip>
+              <p>
+                Testimonials show on the Reviews page. Use the customer&apos;s
+                first name (or &quot;Homeowner, County&quot;) and their words
+                about the job — short quotes work best.
+              </p>
+              <p>
+                Optional project tag (like &quot;Bath LVP floors&quot;) helps
+                visitors know what kind of work it was. Save when you&apos;re
+                ready; published quotes appear on the site right away.
+              </p>
+            </AdminTip>
+            <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
             <div className="admin-card space-y-3">
               <h2 className="font-display text-2xl">Add testimonial</h2>
               <input
@@ -552,11 +628,26 @@ export function AdminDashboard({
                 </div>
               ))}
             </div>
+            </div>
           </div>
         ) : null}
 
         {tab === "proposals" ? (
           <div className="mt-8 space-y-8">
+            <AdminTip>
+              <p>
+                Build a proposal with line items, save it, then send the
+                customer a link — no app signup needed. On your phone, use{" "}
+                <strong>Share</strong> to text it, or <strong>Copy link</strong>{" "}
+                and paste into Messages or email. They can open it and use Print
+                / save PDF on their end.
+              </p>
+              <p>
+                Each saved proposal keeps a private web page that only people
+                with the link can open. Print/PDF still works from that page
+                too.
+              </p>
+            </AdminTip>
             <div className="admin-card space-y-4">
               <h2 className="font-display text-2xl">New proposal</h2>
               <div className="grid gap-3 lg:grid-cols-3">
@@ -751,33 +842,74 @@ export function AdminDashboard({
               <h3 className="mb-3 font-display text-xl">Saved proposals</h3>
               {proposals.length ? (
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {proposals.map((proposal) => (
-                    <div key={proposal.id} className="admin-card">
-                      <div className="flex justify-between gap-3">
-                        <div>
-                          <p className="font-semibold">{proposal.projectTitle}</p>
-                          <p className="text-xs text-white/50">
-                            {proposal.clientName}
-                          </p>
+                  {proposals.map((proposal) => {
+                    const total = proposalAmount(proposal);
+                    const url = `/p/${proposal.publicId}`;
+                    return (
+                      <div key={proposal.id} className="admin-card">
+                        <div className="flex justify-between gap-3">
+                          <div>
+                            <p className="font-semibold">
+                              {proposal.projectTitle}
+                            </p>
+                            <p className="text-xs text-white/50">
+                              {proposal.clientName}
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-[color:var(--oak)]">
+                              Total {formatCurrency(total)}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            className="text-xs text-red-300"
+                            onClick={() => deleteProposal(proposal.id)}
+                          >
+                            Delete
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          className="text-xs text-red-300"
-                          onClick={() => deleteProposal(proposal.id)}
-                        >
-                          Delete
-                        </button>
+                        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-2 text-sm">
+                          <a
+                            className="text-[color:var(--oak)] underline"
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            Open / print
+                          </a>
+                          <button
+                            type="button"
+                            className="underline text-white/70"
+                            onClick={() =>
+                              copyProposalLink(proposal.publicId)
+                            }
+                          >
+                            Copy link
+                          </button>
+                          <button
+                            type="button"
+                            className="underline text-white/70"
+                            onClick={() => shareProposal(proposal)}
+                          >
+                            Share
+                          </button>
+                          <button
+                            type="button"
+                            className="underline text-white/70"
+                            onClick={() => {
+                              const full = proposalUrl(proposal.publicId);
+                              window.location.href = `mailto:?subject=${encodeURIComponent(
+                                `Proposal — ${proposal.projectTitle}`,
+                              )}&body=${encodeURIComponent(
+                                `Here's your proposal from Foglio's Interiors & Remodeling:\n\n${full}\n`,
+                              )}`;
+                            }}
+                          >
+                            Email link
+                          </button>
+                        </div>
                       </div>
-                      <a
-                        className="mt-3 inline-block text-sm text-[color:var(--oak)] underline"
-                        href={`/p/${proposal.publicId}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open / print proposal
-                      </a>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-white/50">

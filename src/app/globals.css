@@ -249,6 +249,46 @@ img {
   gap: 0.5rem;
 }
 
+.admin-tip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.75rem 1rem;
+}
+
+.admin-tip summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(243, 241, 236, 0.55);
+}
+
+.admin-tip summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-tip summary::before {
+  content: "? ";
+  color: var(--oak);
+}
+
+.admin-tip[open] summary {
+  color: rgba(243, 241, 236, 0.85);
+  margin-bottom: 0.65rem;
+}
+
+.admin-tip-body {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(243, 241, 236, 0.68);
+}
+
+.admin-tip-body p + p {
+  margin-top: 0.55rem;
+}
+
 .prose-legal h2 {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.5rem;

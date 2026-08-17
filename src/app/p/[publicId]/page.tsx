@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PrintButton } from "@/components/PrintButton";
+import { ProposalActions } from "@/components/ProposalActions";
 import {
   formatCurrency,
   getProposalByPublicId,
@@ -41,7 +41,7 @@ export default async function ProposalPublicPage({ params }: Props) {
           <Link href="/" className="text-sm text-[color:var(--slate)]">
             ← {siteConfig.shortName}
           </Link>
-          <PrintButton />
+          <ProposalActions />
         </div>
       </div>
 
