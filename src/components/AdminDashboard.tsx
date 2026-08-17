@@ -1,0 +1,793 @@
+"use client";
+
+import { useMemo, useRef, useState } from "react";
+import type { Project, Proposal, ProposalLineItem, Testimonial } from "@/lib/types";
+import { formatCurrency } from "@/lib/content-client";
+import { LINE_CATEGORIES } from "@/lib/proposal-categories";
+
+type Tab = "projects" | "testimonials" | "proposals";
+
+function newLine(): ProposalLineItem {
+  return {
+    id: `line_${Math.random().toString(36).slice(2, 9)}`,
+    category: "Labor",
+    description: "",
+    quantity: 1,
+    unitPrice: 0,
+  };
+}
+
+function patchLine(
+  items: ProposalLineItem[],
+  index: number,
+  patch: Partial<ProposalLineItem>,
+) {
+  const next = [...items];
+  next[index] = { ...next[index], ...patch };
+  return next;
+}
+
+export function AdminDashboard({
+  initialProjects,
+  initialTestimonials,
+  initialProposals,
+}: {
+  initialProjects: Project[];
+  initialTestimonials: Testimonial[];
+  initialProposals: Proposal[];
+}) {
+  const [tab, setTab] = useState<Tab>("projects");
+  const [projects, setProjects] = useState(initialProjects);
+  const [testimonials, setTestimonials] = useState(initialTestimonials);
+  const [proposals, setProposals] = useState(initialProposals);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [projectForm, setProjectForm] = useState({
+    title: "",
+    roomType: "Bathroom",
+    caption: "",
+    images: [] as string[],
+    published: true,
+    featured: false,
+  });
+
+  const [testimonialForm, setTestimonialForm] = useState({
+    name: "",
+    quote: "",
+    projectTag: "",
+    published: true,
+  });
+
+  const [proposalForm, setProposalForm] = useState({
+    clientName: "",
+    clientAddress: "",
+    projectTitle: "",
+    notes: "",
+    lineItems: [newLine()],
+    status: "draft" as "draft" | "sent",
+  });
+
+  const proposalTotal = useMemo(
+    () =>
+      proposalForm.lineItems.reduce(
+        (sum, item) => sum + item.quantity * item.unitPrice,
+        0,
+      ),
+    [proposalForm.lineItems],
+  );
+
+  async function logout() {
+    await fetch("/api/admin/auth", { method: "DELETE" });
+    window.location.href = "/admin/login";
+  }
+
+  async function uploadImage(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+    return data.url as string;
+  }
+
+  async function onProjectImage(files: FileList | File[] | null) {
+    if (!files?.length) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        urls.push(await uploadImage(file));
+      }
+      setProjectForm((f) => ({ ...f, images: [...f.images, ...urls] }));
+      setMessage(
+        urls.length === 1 ? "Photo uploaded." : `${urls.length} photos uploaded.`,
+      );
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function addPhotosToProject(project: Project, files: FileList | null) {
+    if (!files?.length) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        urls.push(await uploadImage(file));
+      }
+      const images = [...project.images, ...urls];
+      const res = await fetch("/api/admin/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: project.id, images }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save photos");
+      setProjects((list) =>
+        list.map((p) => (p.id === project.id ? data.project : p)),
+      );
+      setMessage("Photos added to project.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveProject() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(projectForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save project");
+      setProjects((list) => [data.project, ...list]);
+      setProjectForm({
+        title: "",
+        roomType: "Bathroom",
+        caption: "",
+        images: [],
+        published: true,
+        featured: false,
+      });
+      setMessage("Project saved.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteProject(id: string) {
+    if (!confirm("Delete this project?")) return;
+    const res = await fetch(`/api/admin/projects?id=${id}`, { method: "DELETE" });
+    if (res.ok) setProjects((list) => list.filter((p) => p.id !== id));
+  }
+
+  async function toggleProject(project: Project, field: "published" | "featured") {
+    const res = await fetch("/api/admin/projects", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: project.id, [field]: !project[field] }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setProjects((list) =>
+        list.map((p) => (p.id === project.id ? data.project : p)),
+      );
+    }
+  }
+
+  async function saveTestimonial() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/testimonials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(testimonialForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save testimonial");
+      setTestimonials((list) => [data.testimonial, ...list]);
+      setTestimonialForm({
+        name: "",
+        quote: "",
+        projectTag: "",
+        published: true,
+      });
+      setMessage("Testimonial saved.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteTestimonial(id: string) {
+    if (!confirm("Delete this testimonial?")) return;
+    const res = await fetch(`/api/admin/testimonials?id=${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) setTestimonials((list) => list.filter((t) => t.id !== id));
+  }
+
+  async function saveProposal() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/proposals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(proposalForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save proposal");
+      setProposals((list) => [data.proposal, ...list]);
+      setProposalForm({
+        clientName: "",
+        clientAddress: "",
+        projectTitle: "",
+        notes: "",
+        lineItems: [newLine()],
+        status: "draft",
+      });
+      setMessage(`Proposal saved. Share link: /p/${data.proposal.publicId}`);
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteProposal(id: string) {
+    if (!confirm("Delete this proposal?")) return;
+    const res = await fetch(`/api/admin/proposals?id=${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) setProposals((list) => list.filter((p) => p.id !== id));
+  }
+
+  return (
+    <div className="admin-shell">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--oak)]">
+              Dashboard
+            </p>
+            <h1 className="font-display text-4xl">Content & proposals</h1>
+          </div>
+          <button type="button" className="btn btn-ghost" onClick={logout}>
+            Sign out
+          </button>
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-2">
+          {(
+            [
+              ["projects", "Projects"],
+              ["testimonials", "Testimonials"],
+              ["proposals", "Proposals"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`btn ${tab === id ? "btn-primary" : "btn-ghost"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {message ? (
+          <p className="mt-4 rounded border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80">
+            {message}
+          </p>
+        ) : null}
+
+        {tab === "projects" ? (
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1fr]">
+            <div className="admin-card space-y-3">
+              <h2 className="font-display text-2xl">Add project</h2>
+              <input
+                className="admin-input"
+                placeholder="Title"
+                value={projectForm.title}
+                onChange={(e) =>
+                  setProjectForm((f) => ({ ...f, title: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Room type (Bathroom, Flooring…)"
+                value={projectForm.roomType}
+                onChange={(e) =>
+                  setProjectForm((f) => ({ ...f, roomType: e.target.value }))
+                }
+              />
+              <textarea
+                className="admin-input min-h-24"
+                placeholder="Short caption"
+                value={projectForm.caption}
+                onChange={(e) =>
+                  setProjectForm((f) => ({ ...f, caption: e.target.value }))
+                }
+              />
+
+              <div>
+                <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white/50">
+                  Project photos
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="sr-only"
+                  onChange={(e) => {
+                    onProjectImage(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  type="button"
+                  className={`admin-dropzone w-full ${dragging ? "is-dragging" : ""}`}
+                  disabled={busy}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragging(true);
+                  }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    onProjectImage(e.dataTransfer.files);
+                  }}
+                >
+                  <span className="text-sm font-semibold">
+                    {busy ? "Uploading…" : "Drop photos here or click to upload"}
+                  </span>
+                  <span className="text-xs text-white/45">
+                    JPG, PNG, or HEIC — add as many as you want
+                  </span>
+                </button>
+                {projectForm.images.length ? (
+                  <div className="admin-thumbs mt-3">
+                    {projectForm.images.map((url) => (
+                      <div key={url} className="relative aspect-[4/5] overflow-hidden bg-black/30">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          className="absolute right-1 top-1 bg-black/70 px-1.5 py-0.5 text-[10px] uppercase tracking-wide"
+                          onClick={() =>
+                            setProjectForm((f) => ({
+                              ...f,
+                              images: f.images.filter((src) => src !== url),
+                            }))
+                          }
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={projectForm.published}
+                  onChange={(e) =>
+                    setProjectForm((f) => ({
+                      ...f,
+                      published: e.target.checked,
+                    }))
+                  }
+                />
+                Published
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={projectForm.featured}
+                  onChange={(e) =>
+                    setProjectForm((f) => ({
+                      ...f,
+                      featured: e.target.checked,
+                    }))
+                  }
+                />
+                Featured on homepage
+              </label>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={busy}
+                onClick={saveProject}
+              >
+                Save project
+              </button>
+            </div>
+            <div className="space-y-3">
+              {projects.map((project) => (
+                <div key={project.id} className="admin-card">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 gap-3">
+                      {project.images[0] ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={project.images[0]}
+                          alt=""
+                          className="h-16 w-12 shrink-0 object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-16 w-12 shrink-0 items-center justify-center bg-black/30 text-[10px] text-white/40">
+                          No photo
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-semibold">{project.title}</p>
+                        <p className="text-xs text-white/50">
+                          {project.roomType}
+                          {project.images.length
+                            ? ` · ${project.images.length} photo${project.images.length === 1 ? "" : "s"}`
+                            : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs text-red-300"
+                      onClick={() => deleteProject(project.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => toggleProject(project, "published")}
+                      className="underline"
+                    >
+                      {project.published ? "Unpublish" : "Publish"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleProject(project, "featured")}
+                      className="underline"
+                    >
+                      {project.featured ? "Unfeature" : "Feature"}
+                    </button>
+                    <label className="cursor-pointer underline">
+                      Add photos
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="sr-only"
+                        onChange={(e) => {
+                          addPhotosToProject(project, e.target.files);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "testimonials" ? (
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_1fr]">
+            <div className="admin-card space-y-3">
+              <h2 className="font-display text-2xl">Add testimonial</h2>
+              <input
+                className="admin-input"
+                placeholder='Name (e.g. "Homeowner, Atlantic County")'
+                value={testimonialForm.name}
+                onChange={(e) =>
+                  setTestimonialForm((f) => ({ ...f, name: e.target.value }))
+                }
+              />
+              <textarea
+                className="admin-input min-h-28"
+                placeholder="Quote"
+                value={testimonialForm.quote}
+                onChange={(e) =>
+                  setTestimonialForm((f) => ({ ...f, quote: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Optional project tag"
+                value={testimonialForm.projectTag}
+                onChange={(e) =>
+                  setTestimonialForm((f) => ({
+                    ...f,
+                    projectTag: e.target.value,
+                  }))
+                }
+              />
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={busy}
+                onClick={saveTestimonial}
+              >
+                Save testimonial
+              </button>
+            </div>
+            <div className="space-y-3">
+              {testimonials.map((t) => (
+                <div key={t.id} className="admin-card">
+                  <div className="flex justify-between gap-3">
+                    <p className="font-semibold">{t.name}</p>
+                    <button
+                      type="button"
+                      className="text-xs text-red-300"
+                      onClick={() => deleteTestimonial(t.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <p className="mt-2 text-sm text-white/70">“{t.quote}”</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "proposals" ? (
+          <div className="mt-8 space-y-8">
+            <div className="admin-card space-y-4">
+              <h2 className="font-display text-2xl">New proposal</h2>
+              <div className="grid gap-3 lg:grid-cols-3">
+                <input
+                  className="admin-input"
+                  placeholder="Client name"
+                  value={proposalForm.clientName}
+                  onChange={(e) =>
+                    setProposalForm((f) => ({ ...f, clientName: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input lg:col-span-2"
+                  placeholder="Job address"
+                  value={proposalForm.clientAddress}
+                  onChange={(e) =>
+                    setProposalForm((f) => ({
+                      ...f,
+                      clientAddress: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <input
+                className="admin-input"
+                placeholder="Project title"
+                value={proposalForm.projectTitle}
+                onChange={(e) =>
+                  setProposalForm((f) => ({
+                    ...f,
+                    projectTitle: e.target.value,
+                  }))
+                }
+              />
+              <div className="space-y-4 border border-white/10 p-4 md:p-5">
+                <p className="text-xs uppercase tracking-[0.14em] text-white/50">
+                  Line items
+                </p>
+                {proposalForm.lineItems.map((item, index) => {
+                  const lineTotal = item.quantity * item.unitPrice;
+                  return (
+                    <div
+                      key={item.id}
+                      className="space-y-3 rounded border border-white/10 bg-black/20 p-4"
+                    >
+                      <div className="grid gap-3 lg:grid-cols-[14rem_minmax(0,1fr)]">
+                        <label className="block">
+                          <span className="mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/45">
+                            Category
+                          </span>
+                          <select
+                            className="admin-input"
+                            value={item.category || "Other"}
+                            onChange={(e) =>
+                              setProposalForm((f) => ({
+                                ...f,
+                                lineItems: patchLine(f.lineItems, index, {
+                                  category: e.target.value,
+                                }),
+                              }))
+                            }
+                          >
+                            {LINE_CATEGORIES.map((cat) => (
+                              <option key={cat} value={cat}>
+                                {cat}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="block">
+                          <span className="mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/45">
+                            Description
+                          </span>
+                          <input
+                            className="admin-input"
+                            placeholder="What this line covers — type whatever you need"
+                            value={item.description}
+                            onChange={(e) =>
+                              setProposalForm((f) => ({
+                                ...f,
+                                lineItems: patchLine(f.lineItems, index, {
+                                  description: e.target.value,
+                                }),
+                              }))
+                            }
+                          />
+                        </label>
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[10rem_12rem_minmax(0,1fr)_auto] lg:items-end">
+                        <label className="block">
+                          <span className="mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/45">
+                            Qty
+                          </span>
+                          <input
+                            className="admin-input"
+                            type="number"
+                            min={0}
+                            step={1}
+                            value={item.quantity}
+                            onChange={(e) =>
+                              setProposalForm((f) => ({
+                                ...f,
+                                lineItems: patchLine(f.lineItems, index, {
+                                  quantity: Number(e.target.value),
+                                }),
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="mb-1.5 block text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/45">
+                            Unit price
+                          </span>
+                          <input
+                            className="admin-input"
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={item.unitPrice}
+                            onChange={(e) =>
+                              setProposalForm((f) => ({
+                                ...f,
+                                lineItems: patchLine(f.lineItems, index, {
+                                  unitPrice: Number(e.target.value),
+                                }),
+                              }))
+                            }
+                          />
+                        </label>
+                        <div className="flex h-[2.85rem] items-center text-sm text-white/70">
+                          Line total{" "}
+                          <span className="ml-2 font-semibold text-white">
+                            {formatCurrency(lineTotal)}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          className="justify-self-start text-sm text-red-300 lg:mb-2 lg:justify-self-end"
+                          onClick={() =>
+                            setProposalForm((f) => ({
+                              ...f,
+                              lineItems:
+                                f.lineItems.length > 1
+                                  ? f.lineItems.filter((_, i) => i !== index)
+                                  : f.lineItems,
+                            }))
+                          }
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <button
+                    type="button"
+                    className="btn btn-ghost !py-2"
+                    onClick={() =>
+                      setProposalForm((f) => ({
+                        ...f,
+                        lineItems: [...f.lineItems, newLine()],
+                      }))
+                    }
+                  >
+                    Add line
+                  </button>
+                  <p className="text-base font-semibold">
+                    Proposal total {formatCurrency(proposalTotal)}
+                  </p>
+                </div>
+              </div>
+              <textarea
+                className="admin-input min-h-28"
+                placeholder="Notes / exclusions / timeline"
+                value={proposalForm.notes}
+                onChange={(e) =>
+                  setProposalForm((f) => ({ ...f, notes: e.target.value }))
+                }
+              />
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={busy}
+                onClick={saveProposal}
+              >
+                Save proposal
+              </button>
+            </div>
+
+            <div>
+              <h3 className="mb-3 font-display text-xl">Saved proposals</h3>
+              {proposals.length ? (
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  {proposals.map((proposal) => (
+                    <div key={proposal.id} className="admin-card">
+                      <div className="flex justify-between gap-3">
+                        <div>
+                          <p className="font-semibold">{proposal.projectTitle}</p>
+                          <p className="text-xs text-white/50">
+                            {proposal.clientName}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="text-xs text-red-300"
+                          onClick={() => deleteProposal(proposal.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                      <a
+                        className="mt-3 inline-block text-sm text-[color:var(--oak)] underline"
+                        href={`/p/${proposal.publicId}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open / print proposal
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-white/50">
+                  No proposals yet — save one above to get a shareable link.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}

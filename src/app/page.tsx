@@ -1,69 +1,164 @@
 import Image from "next/image";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ProjectGrid, ProjectsCta } from "@/components/ProjectGrid";
+import { getFeaturedProjects, getPublishedTestimonials } from "@/lib/content";
+import { siteConfig } from "@/lib/site";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: {
+    absolute: `Bathroom Remodeling & Flooring in South Jersey | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+};
+
+export default async function HomePage() {
+  const [projects, testimonials] = await Promise.all([
+    getFeaturedProjects(),
+    getPublishedTestimonials(),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <>
+      <section className="relative min-h-[100svh] overflow-hidden bg-[color:var(--sea-deep)] text-white">
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=2400&q=80"
+            alt="South Jersey bathroom remodel with natural light and tile finishes"
+            fill
+            priority
+            className="hero-media object-cover"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(105deg,rgba(15,26,34,0.88)_0%,rgba(15,26,34,0.55)_48%,rgba(15,26,34,0.25)_100%)]" />
+        </div>
+
+        <div className="container-page relative flex min-h-[100svh] flex-col justify-end pb-16 pt-32 md:justify-center md:pb-24">
+          <p className="reveal section-label !text-[color:var(--oak)] !mb-5">
+            South Jersey bathroom & flooring
+          </p>
+          <h1 className="reveal reveal-delay-1 font-display max-w-3xl text-[clamp(2.8rem,8vw,5.6rem)] leading-[0.95] tracking-tight">
+            {siteConfig.name}
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="reveal reveal-delay-2 mt-6 max-w-xl text-lg text-white/80 md:text-xl">
+            Full bathroom remodels and flooring across South Jersey — from the
+            subfloor up — finished with the care of a family craft tradition.
+          </p>
+          <div className="reveal reveal-delay-3 mt-10 flex flex-wrap gap-3">
+            <Link href="/estimate" className="btn btn-primary">
+              Request an estimate
+            </Link>
+            <Link href="/projects" className="btn btn-ghost">
+              See recent work
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section bg-[color:var(--cream)]">
+        <div className="container-page grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div>
+            <p className="section-label">What we do</p>
+            <h2 className="font-display text-4xl leading-tight tracking-tight md:text-5xl">
+              Bathrooms built right. Floors that last.
+            </h2>
+          </div>
+          <p className="max-w-2xl text-lg text-[color:var(--slate)]">
+            Specialize in complete bathroom remodeling and flooring for homes in{" "}
+            {siteConfig.serviceAreaLabel}. Electricians and plumbers coordinated
+            so the job finishes clean.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="container-page mt-14 grid gap-px bg-[color:var(--line)] md:grid-cols-2">
+          <Link
+            href="/services"
+            className="group bg-[color:var(--cream)] p-8 transition hover:bg-white md:p-12"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Specialty
+            </p>
+            <h3 className="font-display mt-3 text-3xl">Bathroom remodeling</h3>
+            <p className="mt-4 max-w-md text-[color:var(--slate)]">
+              Demolition, subfloors, waterproofing, tile, drywall, fixtures, and
+              finishes — a complete remodel, managed end to end.
+            </p>
+            <span className="mt-8 inline-block text-sm font-semibold uppercase tracking-[0.12em] text-[color:var(--ink)] group-hover:text-[color:var(--oak)]">
+              Explore bathrooms →
+            </span>
+          </Link>
+          <Link
+            href="/services"
+            className="group bg-[color:var(--cream)] p-8 transition hover:bg-white md:p-12"
           >
-            Documentation
-          </a>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Everywhere else
+            </p>
+            <h3 className="font-display mt-3 text-3xl">Flooring</h3>
+            <p className="mt-4 max-w-md text-[color:var(--slate)]">
+              Kitchens, living rooms, bedrooms, and hallways — installed with
+              clean transitions and attention to the details you live with every
+              day.
+            </p>
+            <span className="mt-8 inline-block text-sm font-semibold uppercase tracking-[0.12em] text-[color:var(--ink)] group-hover:text-[color:var(--oak)]">
+              Explore flooring →
+            </span>
+          </Link>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="section bg-[color:var(--sea)] text-white">
+        <div className="container-page grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
+          <div>
+            <p className="section-label !text-[color:var(--oak)]">Legacy</p>
+            <h2 className="font-display text-4xl leading-tight md:text-5xl">
+              Built on twenty years of family craftsmanship.
+            </h2>
+          </div>
+          <div>
+            <p className="text-lg leading-relaxed text-white/75">
+              The Foglio name has been tied to careful home improvement in South
+              Jersey for decades. Today, {siteConfig.shortName} Interiors &amp;
+              Remodeling carries that standard forward — focused on bathrooms and
+              flooring, with the same reliability and quality homeowners expect.
+            </p>
+            <Link href="/about" className="btn btn-ghost mt-8">
+              Our story
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container-page">
+          <p className="section-label">Selected work</p>
+          <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
+            Recent projects
+          </h2>
+          <div className="mt-12">
+            <ProjectGrid projects={projects} compact />
+          </div>
+          <ProjectsCta />
+        </div>
+      </section>
+
+      {testimonials[0] ? (
+        <section className="section bg-[color:var(--paper)]">
+          <div className="container-page max-w-3xl text-center">
+            <p className="section-label">Homeowners</p>
+            <blockquote className="font-display text-3xl leading-snug tracking-tight text-[color:var(--ink)] md:text-4xl">
+              “{testimonials[0].quote}”
+            </blockquote>
+            <p className="mt-6 text-sm font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
+              — {testimonials[0].name}
+            </p>
+            <Link href="/testimonials" className="btn btn-dark mt-10">
+              More reviews
+            </Link>
+          </div>
+        </section>
+      ) : null}
+    </>
   );
 }

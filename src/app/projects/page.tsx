@@ -1,0 +1,35 @@
+import type { Metadata } from "next";
+import { ProjectGrid } from "@/components/ProjectGrid";
+import { getPublishedProjects } from "@/lib/content";
+
+export const metadata: Metadata = {
+  title: "Bathroom & Flooring Projects in South Jersey",
+  description:
+    "Browse bathroom remodel and flooring projects from Foglio's Interiors & Remodeling across South Jersey — baths, LVP, hardwood, and tile.",
+  alternates: { canonical: "/projects" },
+};
+
+export default async function ProjectsPage() {
+  const projects = await getPublishedProjects();
+
+  return (
+    <>
+      <section className="bg-[color:var(--sea-deep)] pb-16 pt-32 text-white">
+        <div className="container-page">
+          <p className="section-label !text-[color:var(--oak)]">Projects</p>
+          <h1 className="font-display max-w-3xl text-5xl leading-tight tracking-tight md:text-6xl">
+            Work that speaks for itself.
+          </h1>
+          <p className="mt-5 max-w-xl text-white/75">
+            A living gallery — updated as new bathrooms and floors are finished.
+          </p>
+        </div>
+      </section>
+      <section className="section">
+        <div className="container-page">
+          <ProjectGrid projects={projects} />
+        </div>
+      </section>
+    </>
+  );
+}
