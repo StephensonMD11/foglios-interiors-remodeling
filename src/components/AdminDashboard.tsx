@@ -390,22 +390,12 @@ export function AdminDashboard({
     }
   }
 
-  async function openProposalShare(proposal: Proposal) {
-    setBusy(true);
-    setMessage("");
-    try {
-      // Reuse an active link for preview; otherwise open a new 7-day share.
-      let shared = proposal;
-      if (!isShareActive(proposal)) {
-        shared = await refreshProposalShare(proposal.id);
-        upsertProposal(shared);
-      }
-      window.open(proposalUrl(shared.publicId!), "_blank", "noopener,noreferrer");
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Could not open proposal");
-    } finally {
-      setBusy(false);
-    }
+  async function openProposalPreview(proposal: Proposal) {
+    window.open(
+      `/admin/proposals/${proposal.id}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   }
 
   return (
@@ -745,9 +735,10 @@ export function AdminDashboard({
                 new link invalidates the old one.
               </p>
               <p>
-                Open / print lets you preview (and share from that screen too).
-                On your phone, Share opens Messages so you can text the customer.
-                No extra apps or passwords needed.
+                Use <strong>Preview</strong> anytime to see the printable
+                proposal without creating a public link. Copy link, Share, or
+                Email is what opens the temporary customer page. On your phone,
+                Share opens Messages so you can text the customer.
               </p>
             </AdminTip>
             <div className="admin-card space-y-4">
@@ -1000,9 +991,9 @@ export function AdminDashboard({
                             type="button"
                             className="text-[color:var(--oak)] underline"
                             disabled={busy}
-                            onClick={() => openProposalShare(proposal)}
+                            onClick={() => openProposalPreview(proposal)}
                           >
-                            Open / print
+                            Preview
                           </button>
                           <button
                             type="button"

@@ -192,6 +192,12 @@ export async function getPublishedTestimonials(): Promise<Testimonial[]> {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+export async function getProposalById(id: string): Promise<Proposal | null> {
+  if (!id) return null;
+  const store = await readStore();
+  return store.proposals.find((p) => p.id === id) ?? null;
+}
+
 export async function getProposalByPublicId(
   publicId: string,
 ): Promise<Proposal | null> {
