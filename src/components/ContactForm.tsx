@@ -9,6 +9,7 @@ export function ContactForm() {
     "idle",
   );
   const [error, setError] = useState("");
+  const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,6 +23,8 @@ export function ContactForm() {
       county: String(form.get("county") || ""),
       projectType: String(form.get("projectType") || ""),
       message: String(form.get("message") || ""),
+      company: String(form.get("company") || ""),
+      formStartedAt,
     });
     if (result.ok) {
       setStatus("ok");
@@ -44,7 +47,10 @@ export function ContactForm() {
         <button
           type="button"
           className="btn btn-dark mt-6"
-          onClick={() => setStatus("idle")}
+          onClick={() => {
+            setFormStartedAt(Date.now());
+            setStatus("idle");
+          }}
         >
           Send another
         </button>
@@ -53,7 +59,26 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 border border-[color:var(--line)] bg-white p-6 md:p-8">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-4 border border-[color:var(--line)] bg-white p-6 md:p-8"
+    >
+      {/* Honeypot for bots — hidden from people, not display:none */}
+      <div
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-0 w-0 overflow-hidden opacity-0"
+      >
+        <label>
+          Company
+          <input
+            type="text"
+            name="company"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </label>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block text-sm">
           <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
@@ -62,6 +87,7 @@ export function ContactForm() {
           <input
             name="name"
             required
+            autoComplete="name"
             className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
           />
         </label>
@@ -73,6 +99,7 @@ export function ContactForm() {
             name="email"
             type="email"
             required
+            autoComplete="email"
             className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
           />
         </label>
@@ -85,6 +112,7 @@ export function ContactForm() {
           <input
             name="phone"
             type="tel"
+            autoComplete="tel"
             className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
           />
         </label>
