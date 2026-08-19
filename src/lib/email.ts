@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import { checkRateLimit } from "./rate-limit";
+import { recordInquiry } from "./stats";
 import { siteConfig } from "./site";
 
 export type ContactPayload = {
@@ -103,6 +104,11 @@ export async function sendContactInquiry(
       county: payload.county,
       projectType: payload.projectType,
     });
+    try {
+      await recordInquiry();
+    } catch {
+      // non-blocking
+    }
     return { ok: true };
   }
 
@@ -132,6 +138,12 @@ export async function sendContactInquiry(
       ok: false,
       error: "Something went wrong sending your message. Please try again.",
     };
+  }
+
+  try {
+    await recordInquiry();
+  } catch {
+    // non-blocking
   }
 
   return { ok: true };

@@ -10,6 +10,7 @@ import {
   isShareActive,
   PROPOSAL_SHARE_DAYS,
 } from "@/lib/proposal-share";
+import type { StatsSummary } from "@/lib/stats";
 
 type Tab = "projects" | "testimonials" | "proposals";
 
@@ -49,10 +50,12 @@ export function AdminDashboard({
   initialProjects,
   initialTestimonials,
   initialProposals,
+  initialStats,
 }: {
   initialProjects: Project[];
   initialTestimonials: Testimonial[];
   initialProposals: Proposal[];
+  initialStats: StatsSummary;
 }) {
   const [tab, setTab] = useState<Tab>("projects");
   const [projects, setProjects] = useState(initialProjects);
@@ -412,6 +415,48 @@ export function AdminDashboard({
             Sign out
           </button>
         </div>
+
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="admin-card">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Estimate inquiries
+            </p>
+            <p className="mt-2 font-display text-3xl">{initialStats.inquiryCount}</p>
+            <p className="mt-1 text-xs text-white/50">
+              {initialStats.inquiriesThisMonth} this month
+            </p>
+          </div>
+          <div className="admin-card">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Unique visitors today
+            </p>
+            <p className="mt-2 font-display text-3xl">
+              {initialStats.uniqueVisitorsToday}
+            </p>
+            <p className="mt-1 text-xs text-white/50">Approx. — one per browser</p>
+          </div>
+          <div className="admin-card">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Unique visitors this month
+            </p>
+            <p className="mt-2 font-display text-3xl">
+              {initialStats.uniqueVisitorsThisMonth}
+            </p>
+            <p className="mt-1 text-xs text-white/50">Hashed IPs, rolling 35 days</p>
+          </div>
+          <div className="admin-card">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Saved proposals
+            </p>
+            <p className="mt-2 font-display text-3xl">{initialProposals.length}</p>
+            <p className="mt-1 text-xs text-white/50">In your admin library</p>
+          </div>
+        </div>
+        {!initialStats.trackingEnabled ? (
+          <p className="mt-3 text-xs text-white/45">
+            Live stats need Blob storage in production — counters start at zero locally.
+          </p>
+        ) : null}
 
         <div className="mt-8 flex flex-wrap gap-2">
           {(

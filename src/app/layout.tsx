@@ -3,6 +3,7 @@ import { Newsreader, Source_Sans_3 } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { JsonLd } from "@/components/JsonLd";
+import { VisitBeacon } from "@/components/VisitBeacon";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 import "./globals.css";
@@ -76,6 +77,7 @@ export default function RootLayout({
         ) : null}
       </head>
       <body className="flex min-h-full flex-col antialiased">
+        <VisitBeacon />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
