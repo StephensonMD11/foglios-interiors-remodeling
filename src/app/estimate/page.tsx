@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
+import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Free Bathroom & Flooring Estimate in South Jersey",
   description:
     "Request a free estimate for bathroom remodeling or flooring installation from Foglio's Interiors & Remodeling in South Jersey.",
-  alternates: { canonical: "/estimate" },
-};
+  path: "/estimate",
+});
 
 export default function EstimatePage() {
   return (

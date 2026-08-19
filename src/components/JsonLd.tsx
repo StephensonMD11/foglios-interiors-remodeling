@@ -2,6 +2,7 @@ import { siteConfig, getSiteUrl } from "@/lib/site";
 
 export function JsonLd() {
   const url = getSiteUrl();
+  const sameAs = [siteConfig.instagram, siteConfig.facebook].filter(Boolean);
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -12,8 +13,10 @@ export function JsonLd() {
         alternateName: "Foglio's Interiors and Remodeling",
         description: siteConfig.description,
         url,
+        logo: `${url}/projects/newark-bath-lvp.png`,
         image: `${url}/projects/newark-bath-lvp.png`,
         priceRange: "$$",
+        ...(sameAs.length ? { sameAs } : {}),
         areaServed: [
           ...siteConfig.serviceArea.map((name) => ({
             "@type": "AdministrativeArea",
@@ -79,7 +82,7 @@ export function JsonLd() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
     />
   );
 }

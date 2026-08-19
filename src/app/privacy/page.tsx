@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: `Privacy policy for ${siteConfig.name}.`,
+export const metadata = {
+  ...pageMetadata({
+    title: "Privacy Policy",
+    description: `Privacy policy for ${siteConfig.name}.`,
+    path: "/privacy",
+  }),
   robots: { index: true, follow: true },
 };
 

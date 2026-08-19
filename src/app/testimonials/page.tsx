@@ -1,19 +1,21 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { TestimonialsJsonLd } from "@/components/TestimonialsJsonLd";
 import { getPublishedTestimonials } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "South Jersey Bathroom & Flooring Reviews",
   description:
     "Homeowner reviews of Foglio's Interiors & Remodeling — bathroom remodeling and flooring work across South Jersey.",
-  alternates: { canonical: "/testimonials" },
-};
+  path: "/testimonials",
+});
 
 export default async function TestimonialsPage() {
   const testimonials = await getPublishedTestimonials();
 
   return (
     <>
+      <TestimonialsJsonLd testimonials={testimonials} />
       <section className="bg-[color:var(--sea-deep)] pb-16 pt-32 text-white">
         <div className="container-page">
           <p className="section-label !text-[color:var(--oak)]">Reviews</p>

@@ -3,6 +3,7 @@ import { Newsreader, Source_Sans_3 } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { JsonLd } from "@/components/JsonLd";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -19,29 +20,38 @@ const body = Source_Sans_3({
   weight: ["400", "500", "600", "700"],
 });
 
+const defaultTitle = `Bathroom Remodeling & Flooring in South Jersey | ${siteConfig.name}`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: `Bathroom Remodeling & Flooring in South Jersey | ${siteConfig.name}`,
+    default: defaultTitle,
     template: `%s | ${siteConfig.shortName}`,
   },
   description: siteConfig.description,
   keywords: [...siteConfig.keywords],
-  alternates: {
-    canonical: "/",
-  },
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: getSiteUrl(),
     siteName: siteConfig.name,
-    title: `Bathroom Remodeling & Flooring in South Jersey | ${siteConfig.name}`,
+    title: defaultTitle,
     description: siteConfig.description,
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1600,
+        height: 1200,
+        alt: `${siteConfig.name} — bathroom and flooring project in South Jersey`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `Bathroom Remodeling & Flooring in South Jersey | ${siteConfig.name}`,
+    title: defaultTitle,
     description: siteConfig.description,
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };

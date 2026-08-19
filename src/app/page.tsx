@@ -1,17 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Metadata } from "next";
 import { ProjectGrid, ProjectsCta } from "@/components/ProjectGrid";
 import { getFeaturedProjects, getPublishedTestimonials } from "@/lib/content";
+import { homeMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: {
-    absolute: `Bathroom Remodeling & Flooring in South Jersey | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  alternates: { canonical: "/" },
-};
+export const metadata = homeMetadata();
 
 export default async function HomePage() {
   const [projects, testimonials] = await Promise.all([

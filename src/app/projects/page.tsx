@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import { ProjectGrid } from "@/components/ProjectGrid";
 import { getPublishedProjects } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Bathroom & Flooring Projects in South Jersey",
   description:
     "Browse bathroom remodel and flooring projects from Foglio's Interiors & Remodeling across South Jersey — baths, LVP, hardwood, and tile.",
-  alternates: { canonical: "/projects" },
-};
+  path: "/projects",
+});
 
 export default async function ProjectsPage() {
   const projects = await getPublishedProjects();

@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "About Our South Jersey Remodeling Company",
   description:
     "Foglio's Interiors & Remodeling — South Jersey bathroom remodeling and flooring craftsmanship rooted in a family home-improvement tradition across Cape May and nearby counties.",
-  alternates: { canonical: "/about" },
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

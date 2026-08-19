@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Bathroom Remodeling & Flooring Services in South Jersey",
   description:
     "Bathroom remodeling and flooring installation across South Jersey — Cape May, Cumberland, Salem, Atlantic, and Gloucester counties. Full gut baths, tile, LVP, and hardwood.",
-  alternates: { canonical: "/services" },
-};
+  path: "/services",
+});
 
 export default function ServicesPage() {
   return (

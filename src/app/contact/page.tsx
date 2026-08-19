@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Contact a South Jersey Remodeling Contractor",
   description:
     "Connect with Foglio's Interiors & Remodeling, or request a free estimate for bathroom remodeling and flooring in South Jersey.",
-  alternates: { canonical: "/contact" },
-};
+  path: "/contact",
+});
 
 function SocialCard({
   label,
