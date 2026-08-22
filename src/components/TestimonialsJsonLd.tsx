@@ -1,9 +1,6 @@
 import type { Testimonial } from "@/lib/types";
 import { getSiteUrl, siteConfig } from "@/lib/site";
-
-function safeJsonLd(data: unknown) {
-  return JSON.stringify(data).replace(/</g, "\\u003c");
-}
+import { safeJsonLd } from "@/lib/json-ld";
 
 export function TestimonialsJsonLd({
   testimonials,
@@ -28,6 +25,7 @@ export function TestimonialsJsonLd({
         name: t.name.split(",")[0]?.trim() || t.name,
       },
       reviewBody: t.quote,
+      datePublished: t.createdAt,
       ...(t.projectTag ? { name: t.projectTag } : {}),
       position: i + 1,
     })),
