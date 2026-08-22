@@ -1,11 +1,15 @@
 import Link from "next/link";
+import {
+  BreadcrumbJsonLd,
+  pageBreadcrumbs,
+} from "@/components/BreadcrumbJsonLd";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Contact a South Jersey Remodeling Contractor",
   description:
-    "Connect with Foglio's Interiors & Remodeling, or request a free estimate for bathroom remodeling and flooring in South Jersey.",
+    "Contact Foglio's for bathroom remodeling and flooring in South Jersey — Cape May, Cumberland, Salem, Atlantic, and Gloucester counties — or request a free estimate.",
   path: "/contact",
 });
 
@@ -82,6 +86,9 @@ export default function ContactPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={pageBreadcrumbs({ name: "Contact", path: "/contact" })}
+      />
       <section className="bg-[color:var(--sea-deep)] pb-16 pt-32 text-white">
         <div className="container-page">
           <p className="section-label !text-[color:var(--oak)]">Contact</p>

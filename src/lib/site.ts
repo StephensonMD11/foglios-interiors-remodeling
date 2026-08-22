@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "Foglio's",
   tagline: "Bathroom remodeling & flooring across South Jersey",
   description:
-    "South Jersey bathroom remodeling and flooring contractor serving Cape May, Cumberland, Salem, Atlantic, and Gloucester counties. Full bathroom remodels, tile, and LVP or hardwood floors installed with care.",
+    "South Jersey bathroom remodeling and flooring contractor serving Cape May, Cumberland, Salem, Atlantic, and Gloucester counties — including Vineland, Millville, Glassboro, Wildwood, and nearby towns. Full bathroom remodels, tile, and LVP or hardwood floors installed with care.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
   serviceArea: [
     "Cape May County",
@@ -14,6 +14,21 @@ export const siteConfig = {
   ],
   serviceAreaLabel:
     "Cape May, Cumberland, Salem, Atlantic, and Gloucester counties",
+  /** Towns named for local SEO + schema areaServed (still within the five counties). */
+  serviceTowns: [
+    "Vineland",
+    "Millville",
+    "Bridgeton",
+    "Glassboro",
+    "Woodbury",
+    "Mullica Hill",
+    "Wildwood",
+    "Cape May",
+    "Ocean City",
+    "Hammonton",
+    "Swedesboro",
+    "Pitman",
+  ],
   services: [
     "Bathroom remodeling",
     "Flooring installation",
@@ -36,6 +51,14 @@ export const siteConfig = {
     "Salem County flooring contractor",
     "luxury vinyl plank South Jersey",
     "bathroom contractor near me South Jersey",
+    "Vineland bathroom remodeling",
+    "Millville flooring contractor",
+    "Glassboro bathroom remodel",
+    "Wildwood flooring installation",
+    "Ocean City bathroom renovation",
+    "Cape May County tile bathroom",
+    "Bridgeton LVP flooring",
+    "Woodbury hardwood floors",
   ],
   phone: process.env.NEXT_PUBLIC_PHONE || "",
   instagram: process.env.NEXT_PUBLIC_INSTAGRAM || "",

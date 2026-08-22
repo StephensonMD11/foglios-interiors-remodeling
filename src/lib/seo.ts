@@ -62,6 +62,7 @@ export function homeMetadata(): Metadata {
   return {
     title: { absolute: title },
     description,
+    keywords: [...siteConfig.keywords],
     alternates: { canonical: "/" },
     openGraph: {
       type: "website",

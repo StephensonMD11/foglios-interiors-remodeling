@@ -1,4 +1,8 @@
 import Link from "next/link";
+import {
+  BreadcrumbJsonLd,
+  pageBreadcrumbs,
+} from "@/components/BreadcrumbJsonLd";
 import { TestimonialsJsonLd } from "@/components/TestimonialsJsonLd";
 import { getPublishedTestimonials } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
@@ -6,7 +10,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "South Jersey Bathroom & Flooring Reviews",
   description:
-    "Homeowner reviews of Foglio's Interiors & Remodeling — bathroom remodeling and flooring work across South Jersey.",
+    "Homeowner reviews of Foglio's bathroom remodeling and flooring work across South Jersey — Cape May County, Atlantic County, Cumberland County, and nearby towns.",
   path: "/testimonials",
 });
 
@@ -15,6 +19,12 @@ export default async function TestimonialsPage() {
 
   return (
     <>
+      <BreadcrumbJsonLd
+        items={pageBreadcrumbs({
+          name: "Reviews",
+          path: "/testimonials",
+        })}
+      />
       <TestimonialsJsonLd testimonials={testimonials} />
       <section className="bg-[color:var(--sea-deep)] pb-16 pt-32 text-white">
         <div className="container-page">

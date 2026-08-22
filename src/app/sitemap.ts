@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getPublishedProjects } from "@/lib/content";
 import { getSiteUrl } from "@/lib/site";
 
 const ROUTES: {
@@ -17,14 +18,30 @@ const ROUTES: {
   { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
-  const built = new Date("2026-08-19T00:00:00.000Z");
+  const built = new Date("2026-08-22T00:00:00.000Z");
+  const projects = await getPublishedProjects();
 
-  return ROUTES.map(({ path, changeFrequency, priority }) => ({
-    url: `${base}${path}`,
-    lastModified: built,
-    changeFrequency,
-    priority,
-  }));
+  const pages: MetadataRoute.Sitemap = ROUTES.map(
+    ({ path, changeFrequency, priority }) => ({
+      url: `${base}${path}`,
+      lastModified: built,
+      changeFrequency,
+      priority,
+      ...(path === "/projects" && projects.length
+        ? {
+            images: projects
+              .flatMap((p) => p.images)
+              .filter((src) => src.startsWith("/") || src.startsWith("http"))
+              .slice(0, 12)
+              .map((src) =>
+                src.startsWith("http") ? src : `${base}${src}`,
+              ),
+          }
+        : {}),
+    }),
+  );
+
+  return pages;
 }

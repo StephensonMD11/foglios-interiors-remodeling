@@ -1,3 +1,7 @@
+import {
+  BreadcrumbJsonLd,
+  pageBreadcrumbs,
+} from "@/components/BreadcrumbJsonLd";
 import { ContactForm } from "@/components/ContactForm";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
@@ -5,13 +9,16 @@ import { siteConfig } from "@/lib/site";
 export const metadata = pageMetadata({
   title: "Free Bathroom & Flooring Estimate in South Jersey",
   description:
-    "Request a free estimate for bathroom remodeling or flooring installation from Foglio's Interiors & Remodeling in South Jersey.",
+    "Request a free estimate for bathroom remodeling or LVP, hardwood, and tile flooring from Foglio's — serving Cape May, Cumberland, Salem, Atlantic, and Gloucester counties.",
   path: "/estimate",
 });
 
 export default function EstimatePage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={pageBreadcrumbs({ name: "Free estimate", path: "/estimate" })}
+      />
       <section className="bg-[color:var(--sea-deep)] pb-16 pt-32 text-white">
         <div className="container-page">
           <p className="section-label !text-[color:var(--oak)]">Free estimate</p>
