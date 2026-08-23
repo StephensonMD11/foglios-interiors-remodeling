@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     clientPhone: body.clientPhone?.trim() || "",
     projectTitle: body.projectTitle?.trim() || "Project proposal",
     notes: body.notes?.trim() || "",
+    adminNotes: "",
     lineItems: normalizeItems(body.lineItems),
     status: body.status === "sent" ? "sent" : "draft",
     createdAt: now,
@@ -62,6 +63,7 @@ export async function PUT(request: Request) {
   const body = (await request.json()) as Partial<Proposal> & {
     id: string;
     refreshShare?: boolean;
+    adminNotesOnly?: boolean;
   };
   const store = await readStore();
   const idx = store.proposals.findIndex((p) => p.id === body.id);
@@ -78,6 +80,16 @@ export async function PUT(request: Request) {
       publicId: newProposalPublicId(),
       shareExpiresAt: shareExpiryIso(),
       status: "sent",
+      updatedAt: now,
+    };
+    await writeStore(store);
+    return NextResponse.json({ proposal: store.proposals[idx] });
+  }
+
+  if (body.adminNotesOnly) {
+    store.proposals[idx] = {
+      ...current,
+      adminNotes: body.adminNotes?.trim() ?? "",
       updatedAt: now,
     };
     await writeStore(store);

@@ -312,6 +312,17 @@ export function AdminDashboard({
     );
   }
 
+  async function saveAdminNotes(id: string, adminNotes: string) {
+    const res = await fetch("/api/admin/proposals", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, adminNotes, adminNotesOnly: true }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not save note");
+    upsertProposal(data.proposal as Proposal);
+  }
+
   async function copyProposalLink(proposal: Proposal) {
     setBusy(true);
     setMessage("");
@@ -865,6 +876,36 @@ export function AdminDashboard({
                             Email link
                           </button>
                         </div>
+                        <label className="mt-4 block">
+                          <span className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+                            Follow-up notes (admin only)
+                          </span>
+                          <textarea
+                            className="admin-input mt-2 min-h-16 resize-y py-2 text-sm"
+                            placeholder="Customer follow-up, scheduling, reminders…"
+                            value={proposal.adminNotes ?? ""}
+                            disabled={busy}
+                            onChange={(e) =>
+                              setProposals((list) =>
+                                list.map((p) =>
+                                  p.id === proposal.id
+                                    ? { ...p, adminNotes: e.target.value }
+                                    : p,
+                                ),
+                              )
+                            }
+                            onBlur={(e) => {
+                              void saveAdminNotes(proposal.id, e.target.value).catch(
+                                (err) =>
+                                  setMessage(
+                                    err instanceof Error
+                                      ? err.message
+                                      : "Could not save note",
+                                  ),
+                              );
+                            }}
+                          />
+                        </label>
                       </div>
                     );
                   })}
@@ -1064,7 +1105,7 @@ export function AdminDashboard({
               </div>
               <textarea
                 className="admin-input min-h-28"
-                placeholder="Notes / exclusions / timeline"
+                placeholder="Notes / exclusions / timeline (shown on proposal)"
                 value={proposalForm.notes}
                 onChange={(e) =>
                   setProposalForm((f) => ({ ...f, notes: e.target.value }))

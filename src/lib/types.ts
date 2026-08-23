@@ -40,7 +40,10 @@ export type Proposal = {
   /** Admin-only — never shown on the public / printable proposal. */
   clientPhone: string;
   projectTitle: string;
+  /** Client-facing notes on the printable / shared proposal. */
   notes: string;
+  /** Admin-only follow-up notes — never shown on the public proposal. */
+  adminNotes: string;
   lineItems: ProposalLineItem[];
   status: "draft" | "sent";
   createdAt: string;
