@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     clientPhone: body.clientPhone?.trim() || "",
     projectTitle: body.projectTitle?.trim() || "Project proposal",
     notes: body.notes?.trim() || "",
-    adminNotes: "",
+    adminNotes: [],
     lineItems: normalizeItems(body.lineItems),
     status: body.status === "sent" ? "sent" : "draft",
     createdAt: now,
@@ -63,7 +63,7 @@ export async function PUT(request: Request) {
   const body = (await request.json()) as Partial<Proposal> & {
     id: string;
     refreshShare?: boolean;
-    adminNotesOnly?: boolean;
+    addAdminNote?: string;
   };
   const store = await readStore();
   const idx = store.proposals.findIndex((p) => p.id === body.id);
@@ -86,10 +86,18 @@ export async function PUT(request: Request) {
     return NextResponse.json({ proposal: store.proposals[idx] });
   }
 
-  if (body.adminNotesOnly) {
+  if (body.addAdminNote !== undefined) {
+    const text = body.addAdminNote.trim();
+    if (!text) {
+      return NextResponse.json({ error: "Note is empty" }, { status: 400 });
+    }
+
     store.proposals[idx] = {
       ...current,
-      adminNotes: body.adminNotes?.trim() ?? "",
+      adminNotes: [
+        { id: newId("note"), text, createdAt: now },
+        ...current.adminNotes,
+      ],
       updatedAt: now,
     };
     await writeStore(store);

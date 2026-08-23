@@ -1,5 +1,5 @@
 import { put, list, del, get } from "@vercel/blob";
-import type { ContentStore, Project, Proposal, Testimonial } from "./types";
+import type { ContentStore, Project, Proposal, ProposalAdminNote, Testimonial } from "./types";
 
 const CONTENT_PATH = "content/store.json";
 
@@ -95,6 +95,33 @@ async function streamToText(stream: ReadableStream<Uint8Array>) {
   return new Response(stream).text();
 }
 
+function normalizeAdminNotes(
+  notes: ProposalAdminNote[] | string | undefined,
+  fallbackAt?: string,
+): ProposalAdminNote[] {
+  if (Array.isArray(notes)) {
+    return notes
+      .filter((note) => note && typeof note.text === "string" && note.text.trim())
+      .map((note) => ({
+        id: note.id || newId("note"),
+        text: note.text.trim(),
+        createdAt: note.createdAt || fallbackAt || new Date().toISOString(),
+      }));
+  }
+
+  if (typeof notes === "string" && notes.trim()) {
+    return [
+      {
+        id: newId("note"),
+        text: notes.trim(),
+        createdAt: fallbackAt || new Date().toISOString(),
+      },
+    ];
+  }
+
+  return [];
+}
+
 function normalizeProposal(proposal: Proposal): Proposal {
   return {
     ...proposal,
@@ -102,7 +129,10 @@ function normalizeProposal(proposal: Proposal): Proposal {
     shareExpiresAt: proposal.shareExpiresAt ?? null,
     clientAddress: proposal.clientAddress ?? "",
     clientPhone: proposal.clientPhone ?? "",
-    adminNotes: proposal.adminNotes ?? "",
+    adminNotes: normalizeAdminNotes(
+      proposal.adminNotes as ProposalAdminNote[] | string | undefined,
+      proposal.updatedAt,
+    ),
   };
 }
 
