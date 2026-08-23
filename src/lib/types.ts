@@ -28,6 +28,12 @@ export type ProposalLineItem = {
   unitPrice: number;
 };
 
+export type ProposalAdminNote = {
+  id: string;
+  text: string;
+  createdAt: string;
+};
+
 export type Proposal = {
   id: string;
   /** Active public share token; null/empty when no share is open. */
@@ -42,8 +48,8 @@ export type Proposal = {
   projectTitle: string;
   /** Client-facing notes on the printable / shared proposal. */
   notes: string;
-  /** Admin-only follow-up notes — never shown on the public proposal. */
-  adminNotes: string;
+  /** Admin-only follow-up note log — never shown on the public proposal. */
+  adminNotes: ProposalAdminNote[];
   lineItems: ProposalLineItem[];
   status: "draft" | "sent";
   createdAt: string;

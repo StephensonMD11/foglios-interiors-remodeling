@@ -46,6 +46,16 @@ function proposalAmount(proposal: Proposal) {
   );
 }
 
+function formatAdminNoteWhen(iso: string) {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function AdminDashboard({
   initialProjects,
   initialTestimonials,
@@ -63,6 +73,7 @@ export function AdminDashboard({
   const [proposals, setProposals] = useState(initialProposals);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -312,15 +323,28 @@ export function AdminDashboard({
     );
   }
 
-  async function saveAdminNotes(id: string, adminNotes: string) {
-    const res = await fetch("/api/admin/proposals", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, adminNotes, adminNotesOnly: true }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Could not save note");
-    upsertProposal(data.proposal as Proposal);
+  async function addAdminNote(id: string) {
+    const text = noteDrafts[id]?.trim();
+    if (!text) return;
+
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/proposals", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, addAdminNote: text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save note");
+      upsertProposal(data.proposal as Proposal);
+      setNoteDrafts((drafts) => ({ ...drafts, [id]: "" }));
+      setMessage("Note saved.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Could not save note");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function copyProposalLink(proposal: Proposal) {
@@ -876,36 +900,62 @@ export function AdminDashboard({
                             Email link
                           </button>
                         </div>
-                        <label className="mt-4 block">
-                          <span className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+                        <div className="mt-4">
+                          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
                             Follow-up notes (admin only)
-                          </span>
-                          <textarea
-                            className="admin-input mt-2 min-h-16 resize-y py-2 text-sm"
-                            placeholder="Customer follow-up, scheduling, reminders…"
-                            value={proposal.adminNotes ?? ""}
-                            disabled={busy}
-                            onChange={(e) =>
-                              setProposals((list) =>
-                                list.map((p) =>
-                                  p.id === proposal.id
-                                    ? { ...p, adminNotes: e.target.value }
-                                    : p,
-                                ),
-                              )
-                            }
-                            onBlur={(e) => {
-                              void saveAdminNotes(proposal.id, e.target.value).catch(
-                                (err) =>
-                                  setMessage(
-                                    err instanceof Error
-                                      ? err.message
-                                      : "Could not save note",
-                                  ),
-                              );
-                            }}
-                          />
-                        </label>
+                          </p>
+                          {proposal.adminNotes.length ? (
+                            <ul className="mt-2 max-h-36 space-y-2 overflow-y-auto">
+                              {proposal.adminNotes.map((note) => (
+                                <li
+                                  key={note.id}
+                                  className="rounded border border-white/10 bg-black/20 px-3 py-2"
+                                >
+                                  <p className="text-[0.65rem] text-white/45">
+                                    {formatAdminNoteWhen(note.createdAt)}
+                                  </p>
+                                  <p className="mt-1 text-sm leading-snug text-white/80">
+                                    {note.text}
+                                  </p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="mt-2 text-xs text-white/35">
+                              No follow-up notes yet.
+                            </p>
+                          )}
+                          <div className="mt-2 flex gap-2">
+                            <input
+                              className="admin-input min-w-0 flex-1 py-2 text-sm"
+                              placeholder="Customer follow-up, scheduling…"
+                              value={noteDrafts[proposal.id] ?? ""}
+                              disabled={busy}
+                              onChange={(e) =>
+                                setNoteDrafts((drafts) => ({
+                                  ...drafts,
+                                  [proposal.id]: e.target.value,
+                                }))
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  void addAdminNote(proposal.id);
+                                }
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-primary shrink-0 !px-3 !py-2 text-xs"
+                              disabled={
+                                busy || !noteDrafts[proposal.id]?.trim()
+                              }
+                              onClick={() => void addAdminNote(proposal.id)}
+                            >
+                              Save note
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
