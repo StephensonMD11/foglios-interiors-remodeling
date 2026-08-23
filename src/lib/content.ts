@@ -102,6 +102,7 @@ function normalizeProposal(proposal: Proposal): Proposal {
     shareExpiresAt: proposal.shareExpiresAt ?? null,
     clientAddress: proposal.clientAddress ?? "",
     clientPhone: proposal.clientPhone ?? "",
+    adminNotes: proposal.adminNotes ?? "",
   };
 }
 
