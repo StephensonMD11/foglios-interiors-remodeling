@@ -1,4 +1,5 @@
 import { siteConfig, getSiteUrl } from "@/lib/site";
+import { safeJsonLd } from "@/lib/json-ld";
 
 export function JsonLd() {
   const url = getSiteUrl();
@@ -22,18 +23,20 @@ export function JsonLd() {
             "@type": "AdministrativeArea",
             name,
           })),
+          ...siteConfig.serviceTowns.map((name) => ({
+            "@type": "City",
+            name,
+            containedInPlace: {
+              "@type": "AdministrativeArea",
+              name: "New Jersey",
+            },
+          })),
           {
             "@type": "Place",
             name: "South Jersey",
           },
         ],
-        knowsAbout: [
-          "Bathroom remodeling",
-          "Flooring installation",
-          "LVP flooring",
-          "Hardwood flooring",
-          "Tile bathrooms",
-        ],
+        knowsAbout: [...siteConfig.services],
         address: {
           "@type": "PostalAddress",
           addressRegion: "NJ",
@@ -52,6 +55,7 @@ export function JsonLd() {
                 description:
                   "Full bathroom remodels in South Jersey — demolition, subfloors, waterproofing, tile, fixtures, and finishes.",
                 areaServed: "South Jersey",
+                serviceType: "Bathroom remodeling",
               },
             },
             {
@@ -62,6 +66,29 @@ export function JsonLd() {
                 description:
                   "LVP, hardwood, and tile flooring for kitchens, living rooms, bedrooms, and baths across South Jersey.",
                 areaServed: "South Jersey",
+                serviceType: "Flooring installation",
+              },
+            },
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Luxury vinyl plank (LVP)",
+                description:
+                  "Waterproof LVP flooring installation for baths, kitchens, and living areas in South Jersey homes.",
+                areaServed: "South Jersey",
+                serviceType: "LVP flooring",
+              },
+            },
+            {
+              "@type": "Offer",
+              itemOffered: {
+                "@type": "Service",
+                name: "Tile installation",
+                description:
+                  "Bathroom and flooring tile installation with proper prep and waterproofing where needed.",
+                areaServed: "South Jersey",
+                serviceType: "Tile installation",
               },
             },
           ],
@@ -82,7 +109,7 @@ export function JsonLd() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }}
     />
   );
 }

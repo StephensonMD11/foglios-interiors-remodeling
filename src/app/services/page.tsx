@@ -1,18 +1,49 @@
 import Image from "next/image";
 import Link from "next/link";
+import {
+  BreadcrumbJsonLd,
+  pageBreadcrumbs,
+} from "@/components/BreadcrumbJsonLd";
+import { FaqJsonLd, type FaqItem } from "@/components/FaqJsonLd";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Bathroom Remodeling & Flooring Services in South Jersey",
   description:
-    "Bathroom remodeling and flooring installation across South Jersey — Cape May, Cumberland, Salem, Atlantic, and Gloucester counties. Full gut baths, tile, LVP, and hardwood.",
+    "Bathroom remodeling and flooring across South Jersey — Vineland, Millville, Glassboro, Wildwood, Ocean City, and nearby towns in Cape May, Cumberland, Salem, Atlantic, and Gloucester counties. Full gut baths, tile, LVP, and hardwood.",
   path: "/services",
 });
+
+const FAQS: FaqItem[] = [
+  {
+    question: "What areas of South Jersey do you serve?",
+    answer: `We serve homeowners across ${siteConfig.serviceAreaLabel}, including towns like ${siteConfig.serviceTowns.slice(0, 6).join(", ")}, and nearby communities.`,
+  },
+  {
+    question: "Do you handle full bathroom remodels or only finishes?",
+    answer:
+      "Both. We handle full gut remodels — demolition, subfloor repair, waterproofing, tile, drywall, fixtures, and finishes — as well as focused refreshes. When electrical or plumbing work is needed, we coordinate the right trades so the project stays organized.",
+  },
+  {
+    question: "What flooring options do you install?",
+    answer:
+      "We install luxury vinyl plank (LVP), hardwood, and tile for kitchens, living rooms, bedrooms, hallways, and baths, with proper subfloor prep and clean transitions.",
+  },
+  {
+    question: "How do I get a free estimate?",
+    answer:
+      "Use the free estimate form on this site to describe your bathroom or flooring project. Messages are delivered privately — there is no public email address on the site.",
+  },
+];
 
 export default function ServicesPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={pageBreadcrumbs({ name: "Services", path: "/services" })}
+      />
+      <FaqJsonLd faqs={FAQS} />
       <section className="bg-[color:var(--sea-deep)] pb-20 pt-32 text-white">
         <div className="container-page">
           <p className="section-label !text-[color:var(--oak)]">Services</p>
@@ -33,7 +64,7 @@ export default function ServicesPage() {
           <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--fog)]">
             <Image
               src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1400&q=80"
-              alt="Tiled bathroom remodel"
+              alt="Tiled bathroom remodel in a South Jersey home"
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -97,7 +128,7 @@ export default function ServicesPage() {
           <div className="relative order-1 aspect-[4/5] overflow-hidden bg-[color:var(--fog)] lg:order-2">
             <Image
               src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1400&q=80"
-              alt="Hardwood flooring in a living space"
+              alt="Hardwood flooring installation in a South Jersey living space"
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -107,11 +138,32 @@ export default function ServicesPage() {
       </section>
 
       <section className="section">
+        <div className="container-page max-w-3xl">
+          <p className="section-label">Common questions</p>
+          <h2 className="font-display text-4xl leading-tight md:text-5xl">
+            Before you start a remodel
+          </h2>
+          <dl className="mt-12 space-y-8">
+            {FAQS.map((faq) => (
+              <div key={faq.question}>
+                <dt className="font-display text-2xl text-[color:var(--ink)]">
+                  {faq.question}
+                </dt>
+                <dd className="mt-3 text-lg leading-relaxed text-[color:var(--slate)]">
+                  {faq.answer}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="section bg-[color:var(--paper)]">
         <div className="container-page max-w-3xl text-center">
           <h2 className="font-display text-4xl">Ready to talk through a project?</h2>
           <p className="mt-4 text-[color:var(--slate)]">
-            Serving Cape May, Cumberland, Salem, Atlantic, and Gloucester
-            counties.
+            Serving {siteConfig.serviceAreaLabel} — including{" "}
+            {siteConfig.serviceTowns.slice(0, 5).join(", ")}, and nearby towns.
           </p>
           <Link href="/estimate" className="btn btn-primary mt-8">
             Request an estimate

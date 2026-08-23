@@ -1,17 +1,24 @@
 import Link from "next/link";
+import {
+  BreadcrumbJsonLd,
+  pageBreadcrumbs,
+} from "@/components/BreadcrumbJsonLd";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "About Our South Jersey Remodeling Company",
   description:
-    "Foglio's Interiors & Remodeling — South Jersey bathroom remodeling and flooring craftsmanship rooted in a family home-improvement tradition across Cape May and nearby counties.",
+    "Meet Foglio's Interiors & Remodeling — bathroom remodeling and flooring craftsmanship for Cape May, Cumberland, Salem, Atlantic, and Gloucester counties, rooted in a family home-improvement tradition.",
   path: "/about",
 });
 
 export default function AboutPage() {
   return (
     <>
+      <BreadcrumbJsonLd
+        items={pageBreadcrumbs({ name: "About", path: "/about" })}
+      />
       <section className="bg-[color:var(--sea-deep)] pb-20 pt-32 text-white">
         <div className="container-page">
           <p className="section-label !text-[color:var(--oak)]">About</p>
@@ -57,7 +64,9 @@ export default function AboutPage() {
                 <strong className="block text-[color:var(--ink)]">
                   Service area
                 </strong>
-                Cape May, Cumberland, Salem, Atlantic & Gloucester counties
+                {siteConfig.serviceAreaLabel} — including{" "}
+                {siteConfig.serviceTowns.slice(0, 4).join(", ")}, and nearby
+                towns
               </li>
               <li>
                 <strong className="block text-[color:var(--ink)]">
