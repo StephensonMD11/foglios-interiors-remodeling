@@ -65,8 +65,8 @@ export default function AboutPage() {
                   Service area
                 </strong>
                 {siteConfig.serviceAreaLabel} — shore towns from Cape May to
-                Longport, plus inland communities like{" "}
-                {siteConfig.serviceTowns.slice(0, 4).join(", ")}
+                Longport, plus inland communities across Cape May and Atlantic
+                counties
               </li>
               <li>
                 <strong className="block text-[color:var(--ink)]">

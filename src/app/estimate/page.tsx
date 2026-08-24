@@ -51,7 +51,7 @@ export default function EstimatePage() {
               ))}
             </ul>
             <p className="mt-6 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
-              Mainland & nearby
+              Inland communities
             </p>
             <ul className="mt-3 space-y-1 text-sm text-[color:var(--slate)]">
               {siteConfig.serviceTowns.map((town) => (

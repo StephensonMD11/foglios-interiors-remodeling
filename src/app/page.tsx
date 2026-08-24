@@ -60,7 +60,7 @@ export default async function HomePage() {
           </div>
           <p className="max-w-2xl text-lg text-[color:var(--slate)]">
             Complete bathroom remodeling and flooring for shore towns and
-            mainland communities across {siteConfig.serviceAreaLabel}.
+            inland communities across {siteConfig.serviceAreaLabel}.
             Electricians and plumbers coordinated so the job finishes clean.
           </p>
         </div>
@@ -106,7 +106,7 @@ export default async function HomePage() {
         <div className="container-page">
           <p className="section-label">Service area</p>
           <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
-            Shore towns & South Jersey mainland
+            Shore towns & South Jersey inland
           </h2>
           <p className="mt-5 max-w-2xl text-lg text-[color:var(--slate)]">
             A lot of our work is along the Jersey Shore — from Cape May up
@@ -128,7 +128,7 @@ export default async function HomePage() {
             </div>
             <div>
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
-                Mainland & nearby
+                Inland communities
               </p>
               <ul className="mt-4 columns-2 gap-x-6 text-[color:var(--ink-soft)]">
                 {siteConfig.serviceTowns.map((town) => (
