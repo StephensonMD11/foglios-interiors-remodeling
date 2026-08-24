@@ -5,6 +5,7 @@ import {
   pageBreadcrumbs,
 } from "@/components/BreadcrumbJsonLd";
 import { FaqJsonLd, type FaqItem } from "@/components/FaqJsonLd";
+import { ServiceAreaTeaser } from "@/components/ServiceAreaSection";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
@@ -18,11 +19,11 @@ export const metadata = pageMetadata({
 const FAQS: FaqItem[] = [
   {
     question: "What areas of South Jersey do you serve?",
-    answer: `We serve homeowners across ${siteConfig.serviceAreaLabel} — including Jersey Shore towns like ${siteConfig.shoreTowns.slice(0, 6).join(", ")}, and inland communities such as ${siteConfig.serviceTowns.slice(0, 5).join(", ")}.`,
+    answer: `We serve homeowners across ${siteConfig.serviceAreaLabel} — Jersey Shore towns from Cape May to Longport, plus inland communities like Egg Harbor Township, Galloway, Vineland, and Millville. See the full list on our About page.`,
   },
   {
     question: "Do you work in shore towns along the coast?",
-    answer: `Yes. We regularly work in shore towns from Cape May through Atlantic City, including ${siteConfig.shoreTowns.slice(0, 8).join(", ")}, and nearby beach communities.`,
+    answer: `Yes. We regularly work in shore towns from Cape May through Atlantic City, and inland across Cape May and Atlantic counties. See our About page for the full list of communities we serve.`,
   },
   {
     question: "Do you handle full bathroom remodels or only finishes?",
@@ -142,47 +143,16 @@ export default function ServicesPage() {
       </section>
 
       <section className="section">
-        <div className="container-page">
-          <p className="section-label">Shore towns</p>
-          <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
-            Bathroom & flooring work along the Jersey Shore
+        <div className="container-page max-w-2xl">
+          <p className="section-label">Where we work</p>
+          <h2 className="font-display text-4xl leading-tight md:text-5xl">
+            Shore towns & inland South Jersey
           </h2>
-          <p className="mt-5 max-w-2xl text-lg text-[color:var(--slate)]">
-            We do a lot of work in shore communities — second homes, year-round
-            residences, and rental properties from Cape May north to Longport.
-          </p>
-          <ul className="mt-10 columns-2 gap-x-8 text-[color:var(--ink-soft)] sm:columns-3 lg:columns-4">
-            {siteConfig.shoreTowns.map((town) => (
-              <li key={town} className="mb-2 break-inside-avoid">
-                {town}
-              </li>
-            ))}
-          </ul>
+          <ServiceAreaTeaser className="mt-5 text-lg leading-relaxed" />
         </div>
       </section>
 
       <section className="section bg-[color:var(--paper)]">
-        <div className="container-page">
-          <p className="section-label">Inland communities</p>
-          <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
-            Bathroom & flooring work inland across South Jersey
-          </h2>
-          <p className="mt-5 max-w-2xl text-lg text-[color:var(--slate)]">
-            Beyond the shore, we work throughout Cape May, Atlantic, Cumberland,
-            Salem, and Gloucester counties — from Egg Harbor and Galloway to
-            Vineland, Millville, and Glassboro.
-          </p>
-          <ul className="mt-10 columns-2 gap-x-8 text-[color:var(--ink-soft)] sm:columns-3 lg:columns-4">
-            {siteConfig.serviceTowns.map((town) => (
-              <li key={town} className="mb-2 break-inside-avoid">
-                {town}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="section">
         <div className="container-page max-w-3xl">
           <p className="section-label">Common questions</p>
           <h2 className="font-display text-4xl leading-tight md:text-5xl">
@@ -207,8 +177,7 @@ export default function ServicesPage() {
         <div className="container-page max-w-3xl text-center">
           <h2 className="font-display text-4xl">Ready to talk through a project?</h2>
           <p className="mt-4 text-[color:var(--slate)]">
-            Serving shore towns from Cape May to Longport, plus{" "}
-            {siteConfig.serviceAreaLabel.toLowerCase()}.
+            <ServiceAreaTeaser />
           </p>
           <Link href="/estimate" className="btn btn-primary mt-8">
             Request an estimate

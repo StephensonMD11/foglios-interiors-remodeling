@@ -3,13 +3,14 @@ import {
   BreadcrumbJsonLd,
   pageBreadcrumbs,
 } from "@/components/BreadcrumbJsonLd";
+import { ServiceAreaSection } from "@/components/ServiceAreaSection";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "About Our South Jersey Remodeling Company",
   description:
-    "Meet Foglio's Interiors & Remodeling — bathroom remodeling and flooring craftsmanship for Cape May, Cumberland, Salem, Atlantic, and Gloucester counties, rooted in a family home-improvement tradition.",
+    "Meet Foglio's — bathroom remodeling and flooring from Cape May to Atlantic City and inland across South Jersey. Family craftsmanship, shore towns, and communities we serve.",
   path: "/about",
 });
 
@@ -25,6 +26,11 @@ export default function AboutPage() {
           <h1 className="font-display max-w-3xl text-5xl leading-tight tracking-tight md:text-6xl">
             A new chapter. The same standard of work.
           </h1>
+          <p className="mt-6 max-w-2xl text-lg text-white/75">
+            Bathroom remodeling and flooring for homeowners across the Jersey
+            Shore and inland South Jersey — with the care of a family craft
+            tradition behind it.
+          </p>
         </div>
       </section>
 
@@ -62,11 +68,17 @@ export default function AboutPage() {
               </li>
               <li>
                 <strong className="block text-[color:var(--ink)]">
-                  Service area
+                  Coverage
                 </strong>
-                {siteConfig.serviceAreaLabel} — shore towns from Cape May to
-                Longport, plus inland communities across Cape May and Atlantic
-                counties
+                Jersey Shore from Cape May to Longport, plus inland towns
+                across {siteConfig.serviceAreaLabel.toLowerCase()}
+              </li>
+              <li>
+                <strong className="block text-[color:var(--ink)]">
+                  How we work
+                </strong>
+                One point of contact, coordinated trades when needed, and
+                finishes that hold up in real daily use
               </li>
               <li>
                 <strong className="block text-[color:var(--ink)]">
@@ -81,7 +93,51 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="section bg-[color:var(--paper)]">
+      <section className="section bg-[color:var(--cream)]">
+        <div className="container-page grid gap-10 lg:grid-cols-3">
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Bathrooms
+            </p>
+            <h2 className="font-display mt-3 text-2xl leading-snug">
+              Built right, start to finish
+            </h2>
+            <p className="mt-3 text-[color:var(--slate)]">
+              Full gut remodels and focused refreshes — demolition, waterproofing,
+              tile, fixtures, and the details that make a bath feel finished.
+            </p>
+          </div>
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Flooring
+            </p>
+            <h2 className="font-display mt-3 text-2xl leading-snug">
+              LVP, hardwood, and tile
+            </h2>
+            <p className="mt-3 text-[color:var(--slate)]">
+              Kitchens, living rooms, bedrooms, and baths — installed with solid
+              prep, clean transitions, and finishes suited to how you use the
+              space.
+            </p>
+          </div>
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Shore & inland
+            </p>
+            <h2 className="font-display mt-3 text-2xl leading-snug">
+              Year-round & seasonal homes
+            </h2>
+            <p className="mt-3 text-[color:var(--slate)]">
+              We work in shore communities and inland towns alike — second homes,
+              rentals, and primary residences that need updates done right.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <ServiceAreaSection />
+
+      <section className="section">
         <div className="container-page max-w-3xl text-center">
           <h2 className="font-display text-4xl">Planning a remodel?</h2>
           <p className="mt-4 text-[color:var(--slate)]">

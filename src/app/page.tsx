@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ProjectGrid, ProjectsCta } from "@/components/ProjectGrid";
+import { ServiceAreaTeaser } from "@/components/ServiceAreaSection";
 import { getFeaturedProjects, getPublishedTestimonials } from "@/lib/content";
 import { homeMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
@@ -103,42 +104,12 @@ export default async function HomePage() {
       </section>
 
       <section className="section bg-[color:var(--paper)]">
-        <div className="container-page">
+        <div className="container-page max-w-2xl">
           <p className="section-label">Service area</p>
-          <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
-            Shore towns & South Jersey inland
+          <h2 className="font-display text-4xl leading-tight md:text-5xl">
+            Jersey Shore & inland South Jersey
           </h2>
-          <p className="mt-5 max-w-2xl text-lg text-[color:var(--slate)]">
-            A lot of our work is along the Jersey Shore — from Cape May up
-            through Atlantic City — plus inland towns across the five counties
-            we serve.
-          </p>
-          <div className="mt-10 grid gap-8 lg:grid-cols-2">
-            <div>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
-                Shore towns
-              </p>
-              <ul className="mt-4 columns-2 gap-x-6 text-[color:var(--ink-soft)] sm:columns-3">
-                {siteConfig.shoreTowns.map((town) => (
-                  <li key={town} className="mb-2 break-inside-avoid">
-                    {town}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
-                Inland communities
-              </p>
-              <ul className="mt-4 columns-2 gap-x-6 text-[color:var(--ink-soft)]">
-                {siteConfig.serviceTowns.map((town) => (
-                  <li key={town} className="mb-2 break-inside-avoid">
-                    {town}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          <ServiceAreaTeaser className="mt-5 text-lg leading-relaxed" />
         </div>
       </section>
 
