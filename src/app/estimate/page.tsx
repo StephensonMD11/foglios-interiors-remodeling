@@ -3,6 +3,7 @@ import {
   pageBreadcrumbs,
 } from "@/components/BreadcrumbJsonLd";
 import { ContactForm } from "@/components/ContactForm";
+import { ServiceAreaTeaser } from "@/components/ServiceAreaSection";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
@@ -37,25 +38,10 @@ export default function EstimatePage() {
           <ContactForm />
           <aside>
             <h2 className="font-display text-3xl">Service area</h2>
-            <p className="mt-5 text-[color:var(--slate)]">
-              {siteConfig.serviceAreaLabel}
-            </p>
-            <p className="mt-6 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
-              Shore towns
-            </p>
-            <ul className="mt-3 columns-2 gap-x-4 text-sm text-[color:var(--slate)]">
-              {siteConfig.shoreTowns.map((town) => (
-                <li key={town} className="mb-1.5 break-inside-avoid">
-                  {town}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-6 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
-              Inland communities
-            </p>
-            <ul className="mt-3 space-y-1 text-sm text-[color:var(--slate)]">
-              {siteConfig.serviceTowns.map((town) => (
-                <li key={town}>{town}</li>
+            <ServiceAreaTeaser className="mt-5 text-[color:var(--slate)]" />
+            <ul className="mt-6 space-y-2 text-sm text-[color:var(--slate)]">
+              {siteConfig.serviceArea.map((c) => (
+                <li key={c}>{c}</li>
               ))}
             </ul>
             {siteConfig.phone ? (
