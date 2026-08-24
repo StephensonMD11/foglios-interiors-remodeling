@@ -23,6 +23,14 @@ export function JsonLd() {
             "@type": "AdministrativeArea",
             name,
           })),
+          ...siteConfig.shoreTowns.map((name) => ({
+            "@type": "City",
+            name,
+            containedInPlace: {
+              "@type": "AdministrativeArea",
+              name: "New Jersey",
+            },
+          })),
           ...siteConfig.serviceTowns.map((name) => ({
             "@type": "City",
             name,

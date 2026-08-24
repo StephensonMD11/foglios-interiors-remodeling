@@ -59,9 +59,9 @@ export default async function HomePage() {
             </h2>
           </div>
           <p className="max-w-2xl text-lg text-[color:var(--slate)]">
-            Specialize in complete bathroom remodeling and flooring for homes in{" "}
-            {siteConfig.serviceAreaLabel}. Electricians and plumbers coordinated
-            so the job finishes clean.
+            Complete bathroom remodeling and flooring for shore towns and
+            mainland communities across {siteConfig.serviceAreaLabel}.
+            Electricians and plumbers coordinated so the job finishes clean.
           </p>
         </div>
 
@@ -99,6 +99,46 @@ export default async function HomePage() {
               Explore flooring →
             </span>
           </Link>
+        </div>
+      </section>
+
+      <section className="section bg-[color:var(--paper)]">
+        <div className="container-page">
+          <p className="section-label">Service area</p>
+          <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
+            Shore towns & South Jersey mainland
+          </h2>
+          <p className="mt-5 max-w-2xl text-lg text-[color:var(--slate)]">
+            A lot of our work is along the Jersey Shore — from Cape May up
+            through Atlantic City — plus inland towns across the five counties
+            we serve.
+          </p>
+          <div className="mt-10 grid gap-8 lg:grid-cols-2">
+            <div>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+                Shore towns
+              </p>
+              <ul className="mt-4 columns-2 gap-x-6 text-[color:var(--ink-soft)] sm:columns-3">
+                {siteConfig.shoreTowns.map((town) => (
+                  <li key={town} className="mb-2 break-inside-avoid">
+                    {town}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+                Mainland & nearby
+              </p>
+              <ul className="mt-4 columns-2 gap-x-6 text-[color:var(--ink-soft)]">
+                {siteConfig.serviceTowns.map((town) => (
+                  <li key={town} className="mb-2 break-inside-avoid">
+                    {town}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

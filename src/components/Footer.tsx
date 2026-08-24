@@ -60,9 +60,8 @@ export function Footer() {
               Service area
             </p>
             <p className="mt-4 text-sm leading-relaxed text-white/75">
-              {siteConfig.serviceAreaLabel} — including{" "}
-              {siteConfig.serviceTowns.slice(0, 6).join(", ")}, and nearby
-              towns.
+              Shore towns from Cape May to Longport, plus{" "}
+              {siteConfig.serviceAreaLabel.toLowerCase()}.
             </p>
             {siteConfig.phone ? (
               <a

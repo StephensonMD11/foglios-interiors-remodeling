@@ -11,14 +11,18 @@ import { siteConfig } from "@/lib/site";
 export const metadata = pageMetadata({
   title: "Bathroom Remodeling & Flooring Services in South Jersey",
   description:
-    "Bathroom remodeling and flooring across South Jersey — Vineland, Millville, Glassboro, Wildwood, Ocean City, and nearby towns in Cape May, Cumberland, Salem, Atlantic, and Gloucester counties. Full gut baths, tile, LVP, and hardwood.",
+    "Bathroom remodeling and flooring across South Jersey shore towns — Cape May, Wildwood, Ocean City, Stone Harbor, Avalon, Atlantic City, and more — plus Vineland, Millville, and Gloucester County communities. Full gut baths, tile, LVP, and hardwood.",
   path: "/services",
 });
 
 const FAQS: FaqItem[] = [
   {
     question: "What areas of South Jersey do you serve?",
-    answer: `We serve homeowners across ${siteConfig.serviceAreaLabel}, including towns like ${siteConfig.serviceTowns.slice(0, 6).join(", ")}, and nearby communities.`,
+    answer: `We serve homeowners across ${siteConfig.serviceAreaLabel} — including Jersey Shore towns like ${siteConfig.shoreTowns.slice(0, 6).join(", ")}, and mainland communities such as ${siteConfig.serviceTowns.slice(0, 4).join(", ")}.`,
+  },
+  {
+    question: "Do you work in shore towns along the coast?",
+    answer: `Yes. We regularly work in shore towns from Cape May through Atlantic City, including ${siteConfig.shoreTowns.slice(0, 8).join(", ")}, and nearby beach communities.`,
   },
   {
     question: "Do you handle full bathroom remodels or only finishes?",
@@ -51,10 +55,10 @@ export default function ServicesPage() {
             Bathroom remodeling & flooring for South Jersey homes.
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-white/75">
-            Focused work across {siteConfig.serviceAreaLabel}: complete
-            bathrooms and flooring anywhere in the home. When other trades are
-            needed, the right electrician and plumber are brought in so the
-            project stays coordinated.
+            Focused work across {siteConfig.serviceAreaLabel} — from Cape May
+            and Wildwood up through Atlantic City, plus inland towns throughout
+            South Jersey. When other trades are needed, the right electrician
+            and plumber are brought in so the project stays coordinated.
           </p>
         </div>
       </section>
@@ -64,7 +68,7 @@ export default function ServicesPage() {
           <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--fog)]">
             <Image
               src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1400&q=80"
-              alt="Tiled bathroom remodel in a South Jersey home"
+              alt="Tiled bathroom remodel in a South Jersey shore town home"
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
@@ -138,6 +142,26 @@ export default function ServicesPage() {
       </section>
 
       <section className="section">
+        <div className="container-page">
+          <p className="section-label">Shore towns</p>
+          <h2 className="font-display max-w-2xl text-4xl leading-tight md:text-5xl">
+            Bathroom & flooring work along the Jersey Shore
+          </h2>
+          <p className="mt-5 max-w-2xl text-lg text-[color:var(--slate)]">
+            We do a lot of work in shore communities — second homes, year-round
+            residences, and rental properties from Cape May north to Longport.
+          </p>
+          <ul className="mt-10 columns-2 gap-x-8 text-[color:var(--ink-soft)] sm:columns-3 lg:columns-4">
+            {siteConfig.shoreTowns.map((town) => (
+              <li key={town} className="mb-2 break-inside-avoid">
+                {town}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="section bg-[color:var(--paper)]">
         <div className="container-page max-w-3xl">
           <p className="section-label">Common questions</p>
           <h2 className="font-display text-4xl leading-tight md:text-5xl">
@@ -158,12 +182,12 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="section bg-[color:var(--paper)]">
+      <section className="section">
         <div className="container-page max-w-3xl text-center">
           <h2 className="font-display text-4xl">Ready to talk through a project?</h2>
           <p className="mt-4 text-[color:var(--slate)]">
-            Serving {siteConfig.serviceAreaLabel} — including{" "}
-            {siteConfig.serviceTowns.slice(0, 5).join(", ")}, and nearby towns.
+            Serving shore towns from Cape May to Longport, plus{" "}
+            {siteConfig.serviceAreaLabel.toLowerCase()}.
           </p>
           <Link href="/estimate" className="btn btn-primary mt-8">
             Request an estimate
