@@ -37,9 +37,25 @@ export default function EstimatePage() {
           <ContactForm />
           <aside>
             <h2 className="font-display text-3xl">Service area</h2>
-            <ul className="mt-5 space-y-2 text-[color:var(--slate)]">
-              {siteConfig.serviceArea.map((c) => (
-                <li key={c}>{c}</li>
+            <p className="mt-5 text-[color:var(--slate)]">
+              {siteConfig.serviceAreaLabel}
+            </p>
+            <p className="mt-6 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Shore towns
+            </p>
+            <ul className="mt-3 columns-2 gap-x-4 text-sm text-[color:var(--slate)]">
+              {siteConfig.shoreTowns.map((town) => (
+                <li key={town} className="mb-1.5 break-inside-avoid">
+                  {town}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[color:var(--oak)]">
+              Mainland & nearby
+            </p>
+            <ul className="mt-3 space-y-1 text-sm text-[color:var(--slate)]">
+              {siteConfig.serviceTowns.map((town) => (
+                <li key={town}>{town}</li>
               ))}
             </ul>
             {siteConfig.phone ? (

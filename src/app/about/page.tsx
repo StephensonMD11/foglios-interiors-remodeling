@@ -64,9 +64,9 @@ export default function AboutPage() {
                 <strong className="block text-[color:var(--ink)]">
                   Service area
                 </strong>
-                {siteConfig.serviceAreaLabel} — including{" "}
-                {siteConfig.serviceTowns.slice(0, 4).join(", ")}, and nearby
-                towns
+                {siteConfig.serviceAreaLabel} — shore towns from Cape May to
+                Longport, plus inland communities like{" "}
+                {siteConfig.serviceTowns.slice(0, 4).join(", ")}
               </li>
               <li>
                 <strong className="block text-[color:var(--ink)]">

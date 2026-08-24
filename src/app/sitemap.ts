@@ -20,7 +20,7 @@ const ROUTES: {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
-  const built = new Date("2026-08-22T00:00:00.000Z");
+  const built = new Date("2026-08-24T00:00:00.000Z");
   const projects = await getPublishedProjects();
 
   const pages: MetadataRoute.Sitemap = ROUTES.map(
