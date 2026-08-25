@@ -24,6 +24,8 @@ export async function GET(request: Request) {
       return new NextResponse("Not found", { status: 404 });
     }
 
+    // Buffer the stream so Content-Length is accurate and browsers don't hang.
+    const bytes = Buffer.from(await new Response(result.stream).arrayBuffer());
     const headers = new Headers();
     headers.set(
       "Content-Type",
@@ -33,11 +35,9 @@ export async function GET(request: Request) {
       "Cache-Control",
       "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
     );
-    if (result.blob.size != null) {
-      headers.set("Content-Length", String(result.blob.size));
-    }
+    headers.set("Content-Length", String(bytes.byteLength));
 
-    return new NextResponse(result.stream, { status: 200, headers });
+    return new NextResponse(bytes, { status: 200, headers });
   } catch (err) {
     console.error("[media]", err);
     return new NextResponse("Not found", { status: 404 });

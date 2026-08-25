@@ -7,6 +7,8 @@ import { ProjectsJsonLd } from "@/components/ProjectsJsonLd";
 import { getPublishedProjects } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = pageMetadata({
   title: "Bathroom & Flooring Projects in South Jersey",
   description:
