@@ -13,18 +13,32 @@ export default function AdminLoginForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/admin/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    setLoading(false);
-    if (!res.ok) {
-      setError("Incorrect password.");
-      return;
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!res.ok) {
+        if (res.status === 429) {
+          setError(
+            "Too many attempts. Wait about 15 minutes and try again.",
+          );
+        } else {
+          setError(data.error || "Incorrect password.");
+        }
+        return;
+      }
+      router.push("/admin");
+      router.refresh();
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    router.push("/admin");
-    router.refresh();
   }
 
   return (

@@ -5,7 +5,8 @@ import { cookies } from "next/headers";
 const COOKIE_NAME = "foglio_admin_session";
 
 function getSecret() {
-  const secret = process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD;
+  const secret =
+    process.env.SESSION_SECRET?.trim() || process.env.ADMIN_PASSWORD?.trim();
   if (!secret) {
     throw new Error("SESSION_SECRET or ADMIN_PASSWORD must be set");
   }
@@ -47,10 +48,13 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 export function verifyPassword(password: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return false;
+  // Trim both sides — trailing spaces/newlines from Vercel env paste
+  // are a common reason a known password suddenly "doesn't work."
+  const expected = process.env.ADMIN_PASSWORD?.trim();
+  const attempt = password.trim();
+  if (!expected || !attempt) return false;
 
-  const a = createHash("sha256").update(password).digest();
+  const a = createHash("sha256").update(attempt).digest();
   const b = createHash("sha256").update(expected).digest();
   return timingSafeEqual(a, b);
 }
