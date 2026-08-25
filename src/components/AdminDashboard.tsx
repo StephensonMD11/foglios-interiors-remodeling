@@ -867,12 +867,17 @@ export function AdminDashboard({
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 gap-3">
                       {project.images[0] ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={publicImageSrc(project.images[0])}
-                          alt=""
-                          className="h-16 w-12 shrink-0 object-cover"
-                        />
+                        <div className="flex shrink-0 gap-1">
+                          {project.images.slice(0, 4).map((image, index) => (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              key={`${image}-${index}`}
+                              src={publicImageSrc(image)}
+                              alt=""
+                              className="h-16 w-12 object-cover"
+                            />
+                          ))}
+                        </div>
                       ) : (
                         <div className="flex h-16 w-12 shrink-0 items-center justify-center bg-black/30 text-[10px] text-white/40">
                           No photo
@@ -885,6 +890,7 @@ export function AdminDashboard({
                           {project.images.length
                             ? ` · ${project.images.length} photo${project.images.length === 1 ? "" : "s"}`
                             : ""}
+                          {project.images.length > 4 ? " (showing first 4)" : ""}
                         </p>
                       </div>
                     </div>

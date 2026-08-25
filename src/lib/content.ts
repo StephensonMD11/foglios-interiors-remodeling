@@ -32,6 +32,7 @@ const fallbackStore = (): ContentStore => ({
         "Full gut remodel — waterproofing, tile, vanity, and lighting coordinated start to finish.",
       images: [
         "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1600&q=80",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=1600&q=80",
       ],
       published: true,
       featured: true,
