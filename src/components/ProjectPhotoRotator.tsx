@@ -91,7 +91,11 @@ export function ProjectPhotoRotator({
             key={i}
             type="button"
             aria-label={`Show photo ${i + 1} of ${photos.length}`}
-            onClick={() => goTo(i)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              goTo(i);
+            }}
             className={`h-1.5 rounded-full transition ${
               i === index
                 ? "w-5 bg-white"
