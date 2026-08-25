@@ -11,6 +11,7 @@ import {
   PROPOSAL_SHARE_DAYS,
 } from "@/lib/proposal-share";
 import type { StatsSummary } from "@/lib/stats";
+import { formatDayLabel } from "@/lib/stats";
 
 type Tab = "projects" | "testimonials" | "proposals";
 
@@ -492,6 +493,78 @@ export function AdminDashboard({
             Live stats need Blob storage in production — counters start at zero locally.
           </p>
         ) : null}
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          <div className="admin-card">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Visitors by day
+            </p>
+            <p className="mt-1 text-xs text-white/40">
+              Last 14 days · unique per day (UTC)
+            </p>
+            <ul className="mt-4 space-y-2">
+              {initialStats.visitorsByDay.map((day) => {
+                const max = Math.max(
+                  1,
+                  ...initialStats.visitorsByDay.map((d) => d.count),
+                );
+                const width = Math.round((day.count / max) * 100);
+                return (
+                  <li key={day.date} className="flex items-center gap-3 text-sm">
+                    <span className="w-28 shrink-0 text-white/55">
+                      {formatDayLabel(day.date)}
+                    </span>
+                    <div className="h-2 min-w-0 flex-1 rounded-full bg-white/10">
+                      <div
+                        className="h-2 rounded-full bg-[color:var(--oak)]"
+                        style={{ width: `${width}%` }}
+                      />
+                    </div>
+                    <span className="w-8 shrink-0 text-right font-semibold tabular-nums">
+                      {day.count}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="admin-card">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+              Visitors by week
+            </p>
+            <p className="mt-1 text-xs text-white/40">
+              Last 5 weeks · unique across the week
+            </p>
+            <ul className="mt-4 space-y-2">
+              {initialStats.visitorsByWeek.map((week) => {
+                const max = Math.max(
+                  1,
+                  ...initialStats.visitorsByWeek.map((w) => w.count),
+                );
+                const width = Math.round((week.count / max) * 100);
+                return (
+                  <li
+                    key={week.weekStart}
+                    className="flex items-center gap-3 text-sm"
+                  >
+                    <span className="w-36 shrink-0 text-white/55">
+                      {week.label}
+                    </span>
+                    <div className="h-2 min-w-0 flex-1 rounded-full bg-white/10">
+                      <div
+                        className="h-2 rounded-full bg-[color:var(--oak)]"
+                        style={{ width: `${width}%` }}
+                      />
+                    </div>
+                    <span className="w-8 shrink-0 text-right font-semibold tabular-nums">
+                      {week.count}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
 
         <div className="mt-8 flex flex-wrap gap-2">
           {(
