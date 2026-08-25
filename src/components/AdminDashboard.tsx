@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { upload } from "@vercel/blob/client";
 import type { Project, Proposal, ProposalLineItem, Testimonial } from "@/lib/types";
 import { formatCurrency } from "@/lib/content-client";
 import { LINE_CATEGORIES } from "@/lib/proposal-categories";
@@ -15,14 +14,65 @@ import type { StatsSummary } from "@/lib/stats";
 import { formatDayLabel } from "@/lib/stats";
 
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+const TARGET_UPLOAD_BYTES = 3.5 * 1024 * 1024;
 const ALLOWED_UPLOAD_TYPES = new Set([
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
   "image/gif",
   "image/heic",
   "image/heif",
 ]);
+
+/** Shrink large phone photos in-browser before the server upload. */
+async function prepareImageForUpload(file: File): Promise<File> {
+  if (file.size <= TARGET_UPLOAD_BYTES) return file;
+  if (!file.type.startsWith("image/") || /heic|heif/i.test(file.type)) {
+    return file;
+  }
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const maxEdge = 2000;
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.82),
+    );
+    if (!blob || blob.size <= 0) return file;
+
+    const base = file.name.replace(/\.[^.]+$/, "") || "photo";
+    return new File([blob], `${base}.jpg`, { type: "image/jpeg" });
+  } catch {
+    return file;
+  }
+}
+
+async function readJsonSafe(res: Response): Promise<{ error?: string; url?: string }> {
+  const text = await res.text();
+  if (!text) {
+    throw new Error(
+      res.status === 413 || res.status >= 500
+        ? "Upload failed — try a smaller JPG under 12MB."
+        : "Upload failed — empty response from server.",
+    );
+  }
+  try {
+    return JSON.parse(text) as { error?: string; url?: string };
+  } catch {
+    throw new Error("Upload failed — unexpected server response.");
+  }
+}
 
 type Tab = "projects" | "testimonials" | "proposals";
 
@@ -138,25 +188,20 @@ export function AdminDashboard({
       throw new Error(`“${file.name}” must be JPG, PNG, WebP, GIF, or HEIC`);
     }
 
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "photo.jpg";
-    try {
-      const blob = await upload(`projects/${safeName}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/upload",
-        contentType: file.type || undefined,
-        multipart: file.size > 4 * 1024 * 1024,
-      });
-      return blob.url;
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Upload failed";
-      if (/json|unexpected end/i.test(message)) {
-        throw new Error(
-          "Upload failed — the photo may be too large. Try a smaller JPG under 12MB.",
-        );
-      }
-      throw new Error(message);
+    const prepared = await prepareImageForUpload(file);
+    if (prepared.size > MAX_UPLOAD_BYTES) {
+      throw new Error(
+        `“${file.name}” is still too large after compression. Try a smaller JPG.`,
+      );
     }
+
+    const form = new FormData();
+    form.append("file", prepared);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+    const data = await readJsonSafe(res);
+    if (!res.ok) throw new Error(data.error || "Upload failed");
+    if (!data.url) throw new Error("Upload failed — no image URL returned");
+    return data.url;
   }
 
   async function onProjectImage(files: FileList | File[] | null) {
