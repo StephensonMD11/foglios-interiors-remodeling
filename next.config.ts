@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  experimental: {
+    // Allow larger admin photo uploads through the app proxy layer.
+    proxyClientMaxBodySize: "20mb",
+  },
   images: {
     remotePatterns: [
       {

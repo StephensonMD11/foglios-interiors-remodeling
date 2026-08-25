@@ -1,69 +1,85 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { isAuthenticated } from "@/lib/auth";
+import { newId } from "@/lib/content";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const MAX_BYTES = 12 * 1024 * 1024;
-const ALLOWED_TYPES = [
+const ALLOWED_TYPES = new Set([
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
   "image/gif",
   "image/heic",
   "image/heif",
-];
+]);
+
+function safeFileName(name: string) {
+  return name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "photo.jpg";
+}
+
+function jsonError(error: string, status: number) {
+  return NextResponse.json({ error }, { status });
+}
 
 /**
- * Client-upload token endpoint for Vercel Blob.
- * The browser uploads the file directly to Blob storage (not through this
- * serverless function), which avoids empty/413 responses on large phone photos.
+ * Server-side image upload to Vercel Blob.
+ * Browser compresses photos first; this route always returns JSON so the
+ * admin UI never hits "Unexpected end of JSON input".
  */
 export async function POST(request: Request) {
-  if (!(await isAuthenticated())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return NextResponse.json(
-      { error: "BLOB_READ_WRITE_TOKEN is not configured" },
-      { status: 500 },
-    );
-  }
-
-  let body: HandleUploadBody;
   try {
-    body = (await request.json()) as HandleUploadBody;
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid upload request" },
-      { status: 400 },
-    );
-  }
+    if (!(await isAuthenticated())) {
+      return jsonError("Unauthorized", 401);
+    }
 
-  try {
-    const json = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async () => {
-        if (!(await isAuthenticated())) {
-          throw new Error("Unauthorized");
-        }
-        return {
-          allowedContentTypes: ALLOWED_TYPES,
-          maximumSizeInBytes: MAX_BYTES,
-          addRandomSuffix: true,
-          tokenPayload: JSON.stringify({ role: "admin" }),
-        };
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return jsonError("BLOB_READ_WRITE_TOKEN is not configured", 500);
+    }
+
+    let form: FormData;
+    try {
+      form = await request.formData();
+    } catch {
+      return jsonError(
+        "Could not read the upload. Try a smaller JPG under 12MB.",
+        413,
+      );
+    }
+
+    const file = form.get("file");
+    if (!(file instanceof File)) {
+      return jsonError("No file uploaded", 400);
+    }
+
+    if (file.size <= 0 || file.size > MAX_BYTES) {
+      return jsonError("Image must be under 12MB", 400);
+    }
+
+    const type = (file.type || "").toLowerCase();
+    if (type && !ALLOWED_TYPES.has(type)) {
+      return jsonError("Only image uploads are allowed (JPG, PNG, WebP, GIF, HEIC)", 400);
+    }
+
+    const blob = await put(
+      `projects/${newId("img")}-${safeFileName(file.name)}`,
+      file,
+      {
+        access: "public",
+        addRandomSuffix: true,
+        contentType: type || "application/octet-stream",
       },
-    });
+    );
 
-    return NextResponse.json(json);
+    return NextResponse.json({ url: blob.url });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Could not prepare upload";
-    const status = message === "Unauthorized" ? 401 : 400;
-    return NextResponse.json({ error: message }, { status });
+    console.error("[upload]", err);
+    return jsonError(
+      err instanceof Error ? err.message : "Upload failed",
+      500,
+    );
   }
 }
