@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import type { Project, Proposal, ProposalLineItem, Testimonial } from "@/lib/types";
 import { formatCurrency } from "@/lib/content-client";
 import { LINE_CATEGORIES } from "@/lib/proposal-categories";
@@ -12,6 +13,16 @@ import {
 } from "@/lib/proposal-share";
 import type { StatsSummary } from "@/lib/stats";
 import { formatDayLabel } from "@/lib/stats";
+
+const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+const ALLOWED_UPLOAD_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/heic",
+  "image/heif",
+]);
 
 type Tab = "projects" | "testimonials" | "proposals";
 
@@ -75,6 +86,7 @@ export function AdminDashboard({
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
+  const [statsDetail, setStatsDetail] = useState<null | "day" | "week">(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -119,12 +131,32 @@ export function AdminDashboard({
   }
 
   async function uploadImage(file: File) {
-    const form = new FormData();
-    form.append("file", file);
-    const res = await fetch("/api/admin/upload", { method: "POST", body: form });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Upload failed");
-    return data.url as string;
+    if (file.size <= 0 || file.size > MAX_UPLOAD_BYTES) {
+      throw new Error(`“${file.name}” must be under 12MB`);
+    }
+    if (file.type && !ALLOWED_UPLOAD_TYPES.has(file.type)) {
+      throw new Error(`“${file.name}” must be JPG, PNG, WebP, GIF, or HEIC`);
+    }
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80) || "photo.jpg";
+    try {
+      const blob = await upload(`projects/${safeName}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/upload",
+        contentType: file.type || undefined,
+        multipart: file.size > 4 * 1024 * 1024,
+      });
+      return blob.url;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Upload failed";
+      if (/json|unexpected end/i.test(message)) {
+        throw new Error(
+          "Upload failed — the photo may be too large. Try a smaller JPG under 12MB.",
+        );
+      }
+      throw new Error(message);
+    }
   }
 
   async function onProjectImage(files: FileList | File[] | null) {
@@ -462,24 +494,52 @@ export function AdminDashboard({
               {initialStats.inquiriesThisMonth} this month
             </p>
           </div>
-          <div className="admin-card">
+          <button
+            type="button"
+            className={`admin-card w-full text-left transition ${
+              statsDetail === "day"
+                ? "ring-1 ring-[color:var(--oak)]"
+                : "hover:bg-white/5"
+            }`}
+            onClick={() =>
+              setStatsDetail((d) => (d === "day" ? null : "day"))
+            }
+          >
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
               Unique visitors today
             </p>
             <p className="mt-2 font-display text-3xl">
               {initialStats.uniqueVisitorsToday}
             </p>
-            <p className="mt-1 text-xs text-white/50">Approx. — one per browser</p>
-          </div>
-          <div className="admin-card">
+            <p className="mt-1 text-xs text-white/50">
+              {statsDetail === "day"
+                ? "Click to hide day-by-day"
+                : "Click for day-by-day"}
+            </p>
+          </button>
+          <button
+            type="button"
+            className={`admin-card w-full text-left transition ${
+              statsDetail === "week"
+                ? "ring-1 ring-[color:var(--oak)]"
+                : "hover:bg-white/5"
+            }`}
+            onClick={() =>
+              setStatsDetail((d) => (d === "week" ? null : "week"))
+            }
+          >
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
               Unique visitors this month
             </p>
             <p className="mt-2 font-display text-3xl">
               {initialStats.uniqueVisitorsThisMonth}
             </p>
-            <p className="mt-1 text-xs text-white/50">Hashed IPs, rolling 35 days</p>
-          </div>
+            <p className="mt-1 text-xs text-white/50">
+              {statsDetail === "week"
+                ? "Click to hide weekly breakdown"
+                : "Click for weekly breakdown"}
+            </p>
+          </button>
           <div className="admin-card">
             <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
               Saved proposals
@@ -494,14 +554,25 @@ export function AdminDashboard({
           </p>
         ) : null}
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-2">
-          <div className="admin-card">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
-              Visitors by day
-            </p>
-            <p className="mt-1 text-xs text-white/40">
-              Last 14 days · unique per day (UTC)
-            </p>
+        {statsDetail === "day" ? (
+          <div className="admin-card mt-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Visitors by day
+                </p>
+                <p className="mt-1 text-xs text-white/40">
+                  Last 14 days · unique per day (UTC)
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-xs text-white/50 underline hover:text-white"
+                onClick={() => setStatsDetail(null)}
+              >
+                Close
+              </button>
+            </div>
             <ul className="mt-4 space-y-2">
               {initialStats.visitorsByDay.map((day) => {
                 const max = Math.max(
@@ -528,13 +599,27 @@ export function AdminDashboard({
               })}
             </ul>
           </div>
-          <div className="admin-card">
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
-              Visitors by week
-            </p>
-            <p className="mt-1 text-xs text-white/40">
-              Last 5 weeks · unique across the week
-            </p>
+        ) : null}
+
+        {statsDetail === "week" ? (
+          <div className="admin-card mt-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Visitors by week
+                </p>
+                <p className="mt-1 text-xs text-white/40">
+                  Last 5 weeks · unique across each week
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-xs text-white/50 underline hover:text-white"
+                onClick={() => setStatsDetail(null)}
+              >
+                Close
+              </button>
+            </div>
             <ul className="mt-4 space-y-2">
               {initialStats.visitorsByWeek.map((week) => {
                 const max = Math.max(
@@ -564,7 +649,7 @@ export function AdminDashboard({
               })}
             </ul>
           </div>
-        </div>
+        ) : null}
 
         <div className="mt-8 flex flex-wrap gap-2">
           {(
@@ -668,7 +753,7 @@ export function AdminDashboard({
                     {busy ? "Uploading…" : "Drop photos here or click to upload"}
                   </span>
                   <span className="text-xs text-white/45">
-                    JPG, PNG, or HEIC — add as many as you want
+                    JPG, PNG, or HEIC under 12MB — add as many as you want
                   </span>
                 </button>
                 {projectForm.images.length ? (
