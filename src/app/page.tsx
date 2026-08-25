@@ -6,6 +6,8 @@ import { getFeaturedProjects, getPublishedTestimonials } from "@/lib/content";
 import { homeMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = homeMetadata();
 
 export default async function HomePage() {

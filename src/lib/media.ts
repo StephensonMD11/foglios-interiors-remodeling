@@ -5,7 +5,9 @@ export function isVercelBlobUrl(src: string) {
     const host = new URL(src).hostname;
     return (
       host.endsWith(".blob.vercel-storage.com") ||
-      host === "blob.vercel-storage.com"
+      host === "blob.vercel-storage.com" ||
+      host.endsWith(".public.blob.vercel-storage.com") ||
+      host.endsWith(".private.blob.vercel-storage.com")
     );
   } catch {
     return false;
@@ -18,8 +20,22 @@ export function isVercelBlobUrl(src: string) {
  */
 export function publicImageSrc(src: string) {
   if (!src) return src;
+  // Already proxied — normalize encoding.
+  if (src.startsWith("/api/media?")) {
+    try {
+      const inner = new URL(
+        src,
+        "https://www.fogliosinteriors.com",
+      ).searchParams.get("u");
+      if (inner && isVercelBlobUrl(inner)) {
+        return `/api/media?u=${encodeURIComponent(inner)}`;
+      }
+    } catch {
+      // fall through
+    }
+    return src;
+  }
   if (src.startsWith("/")) return src;
-  if (src.startsWith("/api/media?")) return src;
   if (isVercelBlobUrl(src)) {
     return `/api/media?u=${encodeURIComponent(src)}`;
   }
