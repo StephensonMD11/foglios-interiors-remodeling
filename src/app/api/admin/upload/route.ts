@@ -68,13 +68,17 @@ export async function POST(request: Request) {
       `projects/${newId("img")}-${safeFileName(file.name)}`,
       file,
       {
-        access: "public",
+        // Store is private-access only — public put() fails with
+        // "Cannot use public access on a private store".
+        access: "private",
         addRandomSuffix: true,
         contentType: type || "application/octet-stream",
       },
     );
 
-    return NextResponse.json({ url: blob.url });
+    // Return a same-origin URL so the public site and admin can display it.
+    const url = `/api/media?u=${encodeURIComponent(blob.url)}`;
+    return NextResponse.json({ url, blobUrl: blob.url });
   } catch (err) {
     console.error("[upload]", err);
     return jsonError(

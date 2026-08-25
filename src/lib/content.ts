@@ -1,5 +1,6 @@
 import { put, list, del, get } from "@vercel/blob";
 import type { ContentStore, Project, Proposal, ProposalAdminNote, Testimonial } from "./types";
+import { publicProjectImages } from "./media";
 
 const CONTENT_PATH = "content/store.json";
 
@@ -207,7 +208,8 @@ export async function getPublishedProjects(): Promise<Project[]> {
   const store = await readStore();
   return store.projects
     .filter((p) => p.published)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(publicProjectImages);
 }
 
 export async function getFeaturedProjects(): Promise<Project[]> {
