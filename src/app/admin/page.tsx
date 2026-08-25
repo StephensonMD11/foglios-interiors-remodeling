@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AdminDashboard } from "@/components/AdminDashboard";
 import { isAuthenticated } from "@/lib/auth";
 import { readStore } from "@/lib/content";
+import { publicProjectImages } from "@/lib/media";
 import { getStatsSummary } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export default async function AdminPage() {
 
   return (
     <AdminDashboard
-      initialProjects={store.projects}
+      initialProjects={store.projects.map(publicProjectImages)}
       initialTestimonials={store.testimonials}
       initialProposals={store.proposals}
       initialStats={stats}

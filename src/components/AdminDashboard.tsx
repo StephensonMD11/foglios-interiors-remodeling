@@ -12,6 +12,7 @@ import {
 } from "@/lib/proposal-share";
 import type { StatsSummary } from "@/lib/stats";
 import { formatDayLabel } from "@/lib/stats";
+import { publicImageSrc } from "@/lib/media";
 
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
 const TARGET_UPLOAD_BYTES = 3.5 * 1024 * 1024;
@@ -806,7 +807,7 @@ export function AdminDashboard({
                     {projectForm.images.map((url) => (
                       <div key={url} className="relative aspect-[4/5] overflow-hidden bg-black/30">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <img src={publicImageSrc(url)} alt="" className="h-full w-full object-cover" />
                         <button
                           type="button"
                           className="absolute right-1 top-1 bg-black/70 px-1.5 py-0.5 text-[10px] uppercase tracking-wide"
@@ -868,7 +869,7 @@ export function AdminDashboard({
                       {project.images[0] ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={project.images[0]}
+                          src={publicImageSrc(project.images[0])}
                           alt=""
                           className="h-16 w-12 shrink-0 object-cover"
                         />

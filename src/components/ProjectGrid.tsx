@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@/lib/types";
+import { publicImageSrc } from "@/lib/media";
 
 export function ProjectGrid({
   projects,
@@ -21,19 +22,22 @@ export function ProjectGrid({
     <div
       className={`grid gap-5 ${compact ? "md:grid-cols-3" : "md:grid-cols-2 lg:grid-cols-3"}`}
     >
-      {projects.map((project, i) => (
+      {projects.map((project, i) => {
+        const image = project.images[0] ? publicImageSrc(project.images[0]) : null;
+        return (
         <article
           key={project.id}
           className={`group reveal reveal-delay-${Math.min(i + 1, 3)}`}
         >
           <div className="relative aspect-[4/5] overflow-hidden bg-[color:var(--fog)]">
-            {project.images[0] ? (
+            {image ? (
               <Image
-                src={project.images[0]}
+                src={image}
                 alt={project.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                unoptimized={image.startsWith("/api/media")}
               />
             ) : null}
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
@@ -52,7 +56,8 @@ export function ProjectGrid({
             </div>
           </div>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }
