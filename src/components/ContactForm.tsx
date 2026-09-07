@@ -147,7 +147,8 @@ export function ContactForm() {
         >
           <option>Bathroom remodel</option>
           <option>Flooring</option>
-          <option>Bathroom + flooring</option>
+          <option>Kitchen flooring</option>
+          <option>Kitchen backsplash</option>
           <option>Other / not sure</option>
         </select>
       </label>
