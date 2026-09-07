@@ -19,6 +19,7 @@ export function TestimonialsJsonLd({
         "@type": "HomeAndConstructionBusiness",
         "@id": `${url}/#business`,
         name: siteConfig.name,
+        legalName: siteConfig.legalName,
       },
       author: {
         "@type": "Person",

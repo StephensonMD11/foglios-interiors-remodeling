@@ -12,6 +12,7 @@ export function JsonLd() {
         "@id": `${url}/#business`,
         name: siteConfig.name,
         alternateName: "Foglio's Interiors and Remodeling",
+        legalName: siteConfig.legalName,
         description: siteConfig.description,
         url,
         logo: `${url}/projects/newark-bath-lvp.png`,

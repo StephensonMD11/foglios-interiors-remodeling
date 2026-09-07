@@ -44,11 +44,12 @@ export default function AboutPage() {
             </p>
             <p>
               The work sits in a longer family story. For roughly two decades,
-              Foglio&apos;s Handyman and Carpentry Services LLC served South
-              Jersey homes with integrity and craftsmanship. That legacy
-              continues here as a focused interiors and remodeling practice —
-              not a rebrand of every past offering, but the same values applied
-              to bathrooms and floors.
+              the Foglio family served South Jersey homes with integrity and
+              craftsmanship through handyman and carpentry work. That legacy
+              continues here as {siteConfig.name}, operated by{" "}
+              {siteConfig.legalName} — a focused interiors and remodeling
+              practice, not a rebrand of every past offering, but the same
+              values applied to bathrooms and floors.
             </p>
             <p>
               Busy schedules are normal in this trade. This site exists so
