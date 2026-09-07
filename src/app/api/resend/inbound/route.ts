@@ -35,7 +35,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  // verify() is local HMAC and does not call Resend, but the constructor
+  // still requires a non-empty key string.
+  const apiKey = process.env.RESEND_API_KEY;
+  const resend = new Resend(apiKey || "re_unconfigured");
 
   let event;
   try {
@@ -73,7 +76,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!process.env.RESEND_API_KEY) {
+  if (!apiKey) {
     console.error("[resend-inbound] RESEND_API_KEY is not set");
     return NextResponse.json(
       { error: "Resend API key is not configured" },
