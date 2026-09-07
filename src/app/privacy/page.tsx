@@ -19,9 +19,10 @@ export default function PrivacyPage() {
           Last updated: August 15, 2026
         </p>
         <p>
-          {siteConfig.name} (&quot;we,&quot; &quot;us&quot;) respects your
-          privacy. This policy explains what information we collect when you use
-          our website and how we use it.
+          {siteConfig.name} (&quot;we,&quot; &quot;us&quot;), operated by{" "}
+          {siteConfig.legalName}, respects your privacy. This policy explains
+          what information we collect when you use our website and how we use
+          it.
         </p>
         <h2>Information we collect</h2>
         <p>When you submit an inquiry form, we collect:</p>

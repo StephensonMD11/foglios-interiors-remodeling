@@ -16,8 +16,9 @@ export default function TermsPage() {
           Last updated: August 15, 2026
         </p>
         <p>
-          By using the {siteConfig.name} website, you agree to these terms.
-          Please read them carefully.
+          By using the {siteConfig.name} website, operated by{" "}
+          {siteConfig.legalName}, you agree to these terms. Please read them
+          carefully.
         </p>
         <h2>Website purpose</h2>
         <p>
