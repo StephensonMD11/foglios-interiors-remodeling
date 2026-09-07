@@ -3,6 +3,11 @@ export const siteConfig = {
   shortName: "Foglio's",
   /** Official legal entity — use only where a legal name is required. Never as `name`. */
   legalName: "Foglio and Sons Contracting LLC",
+  /**
+   * Father's prior company — history/about narrative only.
+   * Never use as legalName, schema legalName, or the consumer brand.
+   */
+  legacyCompany: "Foglio's Handyman and Carpentry Services, LLC",
   tagline: "Bathroom remodeling & flooring across South Jersey",
   description:
     "South Jersey bathroom remodeling and flooring contractor — shore towns from Cape May to Atlantic City, plus inland communities like Egg Harbor Township, Galloway, Hammonton, Vineland, Millville, and Glassboro across Cape May, Cumberland, Salem, Atlantic, and Gloucester counties. Full bathroom remodels, tile, and LVP or hardwood floors installed with care.",

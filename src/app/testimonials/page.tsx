@@ -33,8 +33,10 @@ export default async function TestimonialsPage() {
             What homeowners say.
           </h1>
           <p className="mt-5 max-w-xl text-white/75">
-            Curated testimonials from completed projects. Google reviews can be
-            linked here once the business profile is ready.
+            Curated testimonials from completed bathroom and flooring projects.
+            Public review sites sometimes mix the family&apos;s earlier handyman
+            company with this remodeling practice — a Google profile for this
+            business can be linked here once it&apos;s sorted.
           </p>
         </div>
       </section>

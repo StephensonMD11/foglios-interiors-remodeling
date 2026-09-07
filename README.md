@@ -78,5 +78,5 @@ Without Resend configured, inquiries still succeed in the UI and are logged serv
 ## Notes
 
 - Distinct from Foglio's Flooring Center Inc. (separate family business)
-- Legacy positioning references the handyman/carpentry tradition without claiming identical entities
+- History/about may name Foglio's Handyman and Carpentry Services, LLC (father's prior company); current legal entity is Foglio and Sons Contracting LLC — do not conflate them
 - License/insurance numbers intentionally left as confirm-with-owner placeholders
