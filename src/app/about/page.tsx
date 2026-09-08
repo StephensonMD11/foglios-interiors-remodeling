@@ -51,10 +51,8 @@ export default function AboutPage() {
               clear focus on bathroom remodeling and flooring.
             </p>
             <p>
-              Busy schedules are normal in this trade. This site exists so
-              homeowners can see the work, leave an inquiry, and get a
-              professional response — and so the business can keep a fresh
-              portfolio without living only on social media.
+              Browse the projects, tell us about your space, and we&apos;ll
+              follow up with clear next steps.
             </p>
           </div>
           <aside className="border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
