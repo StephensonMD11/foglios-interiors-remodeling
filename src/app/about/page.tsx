@@ -43,19 +43,16 @@ export default function AboutPage() {
               reliable scheduling, and finishes you&apos;re proud to live with.
             </p>
             <p>
-              The work sits in a longer family story. For roughly two decades,
-              the Foglio family served South Jersey homes with integrity and
-              craftsmanship through handyman and carpentry work. That legacy
-              continues here as {siteConfig.name}, operated by{" "}
-              {siteConfig.legalName} — a focused interiors and remodeling
-              practice, not a rebrand of every past offering, but the same
-              values applied to bathrooms and floors.
+              Behind the work is a longer family story. For nearly twenty years,
+              the owner&apos;s father served South Jersey homes through{" "}
+              {siteConfig.legacyCompany} — known for careful craftsmanship and
+              straightforward communication. That same standard continues today
+              as {siteConfig.name}, operated by {siteConfig.legalName}, with a
+              clear focus on bathroom remodeling and flooring.
             </p>
             <p>
-              Busy schedules are normal in this trade. This site exists so
-              homeowners can see the work, leave an inquiry, and get a
-              professional response — and so the business can keep a fresh
-              portfolio without living only on social media.
+              Browse the projects, tell us about your space, and we&apos;ll
+              follow up with clear next steps.
             </p>
           </div>
           <aside className="border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
