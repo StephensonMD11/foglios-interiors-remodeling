@@ -52,13 +52,6 @@ export default function AboutPage() {
               values applied to bathrooms and floors.
             </p>
             <p>
-              Because the Foglio name has been on South Jersey jobs for years,
-              public review sites sometimes mix feedback from the earlier
-              handyman company with this remodeling practice. The testimonials
-              on this site are curated for the bathroom and flooring work shown
-              here.
-            </p>
-            <p>
               Busy schedules are normal in this trade. This site exists so
               homeowners can see the work, leave an inquiry, and get a
               professional response — and so the business can keep a fresh
