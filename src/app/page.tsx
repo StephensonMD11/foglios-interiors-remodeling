@@ -125,11 +125,10 @@ export default async function HomePage() {
           </div>
           <div>
             <p className="text-lg leading-relaxed text-white/75">
-              For about twenty years, {siteConfig.legacyCompany} set the
-              family&apos;s standard for careful work across South Jersey. Today,{" "}
-              {siteConfig.shortName} Interiors &amp; Remodeling carries that
-              standard forward — focused on bathrooms and flooring, with the same
-              reliability and quality homeowners expect.
+              Nearly twenty years of careful work began with{" "}
+              {siteConfig.legacyCompany}. Today, {siteConfig.shortName} Interiors
+              &amp; Remodeling carries that family standard forward — focused on
+              bathrooms and flooring, with the same reliability homeowners expect.
             </p>
             <Link href="/about" className="btn btn-ghost mt-8">
               Our story

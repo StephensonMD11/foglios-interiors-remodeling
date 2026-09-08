@@ -43,13 +43,12 @@ export default function AboutPage() {
               reliable scheduling, and finishes you&apos;re proud to live with.
             </p>
             <p>
-              The work sits in a longer family story. For roughly two decades,
-              the owner&apos;s father ran {siteConfig.legacyCompany} —
-              serving South Jersey homes with integrity and craftsmanship.
-              That legacy continues here as {siteConfig.name}, operated by{" "}
-              {siteConfig.legalName} — a focused interiors and remodeling
-              practice, not a rebrand of every past offering, but the same
-              values applied to bathrooms and floors.
+              Behind the work is a longer family story. For nearly twenty years,
+              the owner&apos;s father served South Jersey homes through{" "}
+              {siteConfig.legacyCompany} — known for careful craftsmanship and
+              straightforward communication. That same standard continues today
+              as {siteConfig.name}, operated by {siteConfig.legalName}, with a
+              clear focus on bathroom remodeling and flooring.
             </p>
             <p>
               Busy schedules are normal in this trade. This site exists so
