@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
+/** Receive match only — apex MX is Outlook, not Resend. */
 const BLAIR_INBOUND = "blair@fogliosinteriors.com";
-const DEFAULT_FORWARD_TO = "blair@orbitsecuritygroup.org";
+/** Human inbox. Drew may instead forward M365 → this Hotmail. */
+const DEFAULT_FORWARD_TO = "Leonard3587@hotmail.com";
+const DEFAULT_FORWARD_FROM = "Foglio's <noreply@fogliosinteriors.com>";
 
 function stringAddresses(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -65,16 +68,9 @@ export async function POST(request: Request) {
   }
 
   const from =
-    process.env.INBOUND_FORWARD_FROM || process.env.CONTACT_FROM_EMAIL;
-  if (!from) {
-    console.error(
-      "[resend-inbound] Missing verified sender: set INBOUND_FORWARD_FROM or CONTACT_FROM_EMAIL to a verified fogliosinteriors.com address",
-    );
-    return NextResponse.json(
-      { error: "Forward from address is not configured" },
-      { status: 500 },
-    );
-  }
+    process.env.INBOUND_FORWARD_FROM?.trim() ||
+    process.env.CONTACT_FROM_EMAIL?.trim() ||
+    DEFAULT_FORWARD_FROM;
 
   if (!apiKey) {
     console.error("[resend-inbound] RESEND_API_KEY is not set");
@@ -84,7 +80,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const to = process.env.INBOUND_BLAIR_FORWARD_TO || DEFAULT_FORWARD_TO;
+  const to =
+    process.env.INBOUND_BLAIR_FORWARD_TO?.trim() || DEFAULT_FORWARD_TO;
 
   try {
     const { data, error } = await resend.emails.receiving.forward({

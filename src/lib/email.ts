@@ -87,7 +87,8 @@ export async function sendContactInquiry(
     return { ok: false, error: "Please enter a valid email address." };
   }
 
-  const to = process.env.CONTACT_TO_EMAIL;
+  // Human To is the owner Hotmail inbox — never a public address.
+  const to = process.env.CONTACT_TO_EMAIL?.trim() || "Leonard3587@hotmail.com";
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!to || !apiKey) {
@@ -113,8 +114,10 @@ export async function sendContactInquiry(
   }
 
   const resend = new Resend(apiKey);
+  // Verified Resend sender (transactional send / DKIM only — never apex MX).
   const from =
-    process.env.CONTACT_FROM_EMAIL || "Foglio's Website <onboarding@resend.dev>";
+    process.env.CONTACT_FROM_EMAIL?.trim() ||
+    "Foglio's Website <noreply@fogliosinteriors.com>";
 
   const { error } = await resend.emails.send({
     from,
