@@ -8,7 +8,7 @@ High-end marketing site + light owner dashboard for bathroom remodeling and floo
 - Tailwind CSS v4
 - Vercel Blob for project photos + content JSON
 - Password-protected `/admin` (no user accounts)
-- Contact form via Resend → private `CONTACT_TO_EMAIL` (never shown publicly)
+- Contact form via Resend (send-only) → private `CONTACT_TO_EMAIL` (never shown publicly)
 - Proposal builder → shareable `/p/[id]` pages (print / save as PDF)
 
 ## Quick start
@@ -32,9 +32,12 @@ Without `BLOB_READ_WRITE_TOKEN`, the site shows demo projects/testimonials and a
 | `ADMIN_PASSWORD` | Owner dashboard password |
 | `SESSION_SECRET` | Signs admin session cookie |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob read/write |
-| `CONTACT_TO_EMAIL` | Where inquiries are delivered (private) |
+| `CONTACT_TO_EMAIL` | Private human inbox for inquiries (default `Leonard3587@hotmail.com`) |
 | `RESEND_API_KEY` | Sends inquiry emails |
-| `CONTACT_FROM_EMAIL` | Optional Resend from address |
+| `CONTACT_FROM_EMAIL` | Verified Resend From (`noreply@fogliosinteriors.com`) |
+| `INBOUND_BLAIR_FORWARD_TO` | Optional inbound forward target (default owner Hotmail) |
+| `INBOUND_FORWARD_FROM` | Optional inbound From (defaults to verified `noreply@`) |
+| `RESEND_WEBHOOK_SECRET` | Optional Resend inbound webhook signing secret |
 | `NEXT_PUBLIC_PHONE` | Optional public phone |
 | `NEXT_PUBLIC_INSTAGRAM` | Optional Instagram handle/URL |
 | `NEXT_PUBLIC_ADSENSE_CLIENT` | Enables AdSense script when set |
@@ -49,16 +52,16 @@ Without `BLOB_READ_WRITE_TOKEN`, the site shows demo projects/testimonials and a
 6. Domain: `fogliosinteriors.com` (canonical `www.fogliosinteriors.com`). If DNS is still at GoDaddy, set:
    - `A` `@` → `76.76.21.21`
    - `CNAME` `www` → `7f579fcd7ce8de78.vercel-dns-017.com.`
-   Or change nameservers to `ns1.vercel-dns.com` / `ns2.vercel-dns.com` (easier later for MX/email).
+   Or change nameservers to `ns1.vercel-dns.com` / `ns2.vercel-dns.com`.
 
-## Resend setup (contact form)
+## Email (Resend send-only + Microsoft 365)
 
-1. Create a free [Resend](https://resend.com) account
-2. Add `RESEND_API_KEY` and `CONTACT_TO_EMAIL` in Vercel
-3. Until a domain is verified, use `onboarding@resend.dev` as the from address (testing)
-4. After domain + MX: verify the domain in Resend and set `CONTACT_FROM_EMAIL`
+- Apex MX stays Microsoft 365 / Outlook. **Never** point apex MX at Resend.
+- Resend is transactional send only: contact form From is verified `noreply@fogliosinteriors.com` (DKIM on the Resend send subdomain).
+- Human To for estimate/contact inquiries is `Leonard3587@hotmail.com` (`CONTACT_TO_EMAIL`). Do not use Proton or personal Gmail.
+- Optional `/api/resend/inbound` webhook still matches `blair@fogliosinteriors.com` and forwards to `Leonard3587@hotmail.com`. Because apex MX is Outlook, Resend will not receive apex mail unless Drew adds an `inbound.*` subdomain MX — never reclaim apex. Drew may instead forward M365 → Hotmail and leave this webhook unused.
 
-Without Resend configured, inquiries still succeed in the UI and are logged server-side (useful for local preview).
+Without `RESEND_API_KEY`, inquiries still succeed in the UI and are logged server-side (useful for local preview).
 
 ## Pages
 
