@@ -4,24 +4,56 @@ import { useState, type FormEvent } from "react";
 import { sendContactInquiry } from "@/lib/email";
 import { siteConfig } from "@/lib/site";
 
+const PROJECT_TYPES = [
+  "Bathroom remodel",
+  "Flooring",
+  "Kitchen flooring",
+  "Kitchen backsplash",
+  "Other / not listed",
+] as const;
+
+const OTHER_COUNTY = "Other";
+const OTHER_PROJECT = "Other / not listed";
+
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">(
     "idle",
   );
   const [error, setError] = useState("");
   const [formStartedAt, setFormStartedAt] = useState(() => Date.now());
+  const [county, setCounty] = useState("");
+  const [projectType, setProjectType] = useState<string>("Bathroom remodel");
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
     setError("");
     const form = new FormData(e.currentTarget);
+
+    const countySelect = String(form.get("county") || "");
+    const countyOther = String(form.get("countyOther") || "").trim();
+    const resolvedCounty =
+      countySelect === OTHER_COUNTY
+        ? countyOther
+          ? `Other: ${countyOther}`
+          : OTHER_COUNTY
+        : countySelect;
+
+    const projectSelect = String(form.get("projectType") || "");
+    const projectOther = String(form.get("projectTypeOther") || "").trim();
+    const resolvedProjectType =
+      projectSelect === OTHER_PROJECT
+        ? projectOther
+          ? `Other: ${projectOther}`
+          : OTHER_PROJECT
+        : projectSelect;
+
     const result = await sendContactInquiry({
       name: String(form.get("name") || ""),
       email: String(form.get("email") || ""),
       phone: String(form.get("phone") || ""),
-      county: String(form.get("county") || ""),
-      projectType: String(form.get("projectType") || ""),
+      county: resolvedCounty,
+      projectType: resolvedProjectType,
       message: String(form.get("message") || ""),
       company: String(form.get("company") || ""),
       formStartedAt,
@@ -29,6 +61,8 @@ export function ContactForm() {
     if (result.ok) {
       setStatus("ok");
       e.currentTarget.reset();
+      setCounty("");
+      setProjectType("Bathroom remodel");
     } else {
       setStatus("err");
       setError(result.error);
@@ -116,41 +150,75 @@ export function ContactForm() {
             className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
           />
         </label>
+        <div className="space-y-4">
+          <label className="block text-sm">
+            <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
+              County
+            </span>
+            <select
+              name="county"
+              className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
+              value={county}
+              onChange={(e) => setCounty(e.target.value)}
+            >
+              <option value="" disabled>
+                Select county
+              </option>
+              {siteConfig.serviceArea.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+              <option value={OTHER_COUNTY}>{OTHER_COUNTY}</option>
+            </select>
+          </label>
+          {county === OTHER_COUNTY ? (
+            <label className="block text-sm">
+              <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
+                Your county
+              </span>
+              <input
+                name="countyOther"
+                required
+                placeholder="County not listed"
+                className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
+              />
+            </label>
+          ) : null}
+        </div>
+      </div>
+      <div className="space-y-4">
         <label className="block text-sm">
           <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
-            County
+            Project type
           </span>
           <select
-            name="county"
+            name="projectType"
             className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
-            defaultValue=""
+            value={projectType}
+            onChange={(e) => setProjectType(e.target.value)}
           >
-            <option value="" disabled>
-              Select county
-            </option>
-            {siteConfig.serviceArea.map((c) => (
-              <option key={c} value={c}>
-                {c}
+            {PROJECT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
               </option>
             ))}
           </select>
         </label>
+        {projectType === OTHER_PROJECT ? (
+          <label className="block text-sm">
+            <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
+              What are you inquiring about?
+            </span>
+            <input
+              name="projectTypeOther"
+              required
+              placeholder="Describe the project type"
+              className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
+            />
+          </label>
+        ) : null}
       </div>
-      <label className="block text-sm">
-        <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
-          Project type
-        </span>
-        <select
-          name="projectType"
-          className="w-full border border-[color:var(--line)] bg-[color:var(--cream)] px-3 py-3 outline-none focus:border-[color:var(--oak)]"
-          defaultValue="Bathroom remodel"
-        >
-          <option>Bathroom remodel</option>
-          <option>Flooring</option>
-          <option>Bathroom + flooring</option>
-          <option>Other / not sure</option>
-        </select>
-      </label>
       <label className="block text-sm">
         <span className="mb-1.5 block text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--slate)]">
           Tell us about the project
