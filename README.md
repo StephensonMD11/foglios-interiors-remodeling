@@ -59,6 +59,7 @@ Without `BLOB_READ_WRITE_TOKEN`, the site shows demo projects/testimonials and a
 - Apex MX stays Microsoft 365 / Outlook. **Never** point apex MX at Resend.
 - Resend is transactional send only: contact form From is verified `noreply@fogliosinteriors.com` (DKIM on the Resend send subdomain).
 - Human To for estimate/contact inquiries is `Leonard3587@hotmail.com` (`CONTACT_TO_EMAIL`). Do not use Proton or personal Gmail.
+- After a successful owner notification, Resend also sends an automatic thank-you / confirmation to the submitter (reply-to is the Hotmail inbox). Ack failures are logged and do not fail the form.
 - Optional `/api/resend/inbound` webhook still matches `blair@fogliosinteriors.com` and forwards to `Leonard3587@hotmail.com`. Because apex MX is Outlook, Resend will not receive apex mail unless Drew adds an `inbound.*` subdomain MX — never reclaim apex. Drew may instead forward M365 → Hotmail and leave this webhook unused.
 
 Without `RESEND_API_KEY`, inquiries still succeed in the UI and are logged server-side (useful for local preview).

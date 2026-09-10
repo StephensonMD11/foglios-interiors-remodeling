@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { Resend } from "resend";
 import { checkRateLimit } from "./rate-limit";
 import { recordInquiry } from "./stats";
-import { siteConfig } from "./site";
+import { getSiteUrl, siteConfig } from "./site";
 
 export type ContactPayload = {
   name: string;
@@ -141,6 +141,41 @@ export async function sendContactInquiry(
       ok: false,
       error: "Something went wrong sending your message. Please try again.",
     };
+  }
+
+  // Immediate acknowledgment so the submitter knows the form went through.
+  // Failures here must not undo a successful owner notification.
+  try {
+    const firstName = name.split(/\s+/)[0] || name;
+    const projectLine = payload.projectType?.trim()
+      ? `We have your note about: ${payload.projectType.trim()}.`
+      : "We have your project details.";
+    const { error: ackError } = await resend.emails.send({
+      from,
+      to: [email],
+      replyTo: to,
+      subject: `Thanks for reaching out — ${siteConfig.shortName}`,
+      text: [
+        `Hey ${firstName},`,
+        "",
+        `Thank you for your inquiry with ${siteConfig.name}.`,
+        "",
+        "This is a quick confirmation that your message came through successfully. Someone from our team will follow up soon.",
+        "",
+        projectLine,
+        "",
+        "If you need to add details, just reply to this email.",
+        "",
+        `— ${siteConfig.shortName}`,
+        siteConfig.tagline,
+        getSiteUrl(),
+      ].join("\n"),
+    });
+    if (ackError) {
+      console.error("[contact] Acknowledgment email failed", ackError);
+    }
+  } catch (ackErr) {
+    console.error("[contact] Acknowledgment email threw", ackErr);
   }
 
   try {
