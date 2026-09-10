@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       <div className="container-page prose-legal max-w-3xl">
         <h1 className="font-display text-5xl tracking-tight">Privacy Policy</h1>
         <p className="text-sm text-[color:var(--slate)]">
-          Last updated: August 15, 2026
+          Last updated: September 10, 2026
         </p>
         <p>
           {siteConfig.name} (&quot;we,&quot; &quot;us&quot;), operated by{" "}
@@ -38,6 +38,10 @@ export default function PrivacyPage() {
         <h2>How we use information</h2>
         <ul>
           <li>To respond to project inquiries and provide estimates</li>
+          <li>
+            To send an automatic confirmation email after you submit the
+            estimate form, so you know your message was received
+          </li>
           <li>To improve the website and understand visitor interest</li>
           <li>
             To show relevant advertising if Google AdSense or similar services

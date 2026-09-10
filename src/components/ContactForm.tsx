@@ -76,7 +76,8 @@ export function ContactForm() {
           Thank you — message received.
         </p>
         <p className="mt-3 text-[color:var(--slate)]">
-          We&apos;ll follow up soon about your project.
+          We&apos;ll follow up soon about your project. You should also get a
+          short confirmation email shortly.
         </p>
         <button
           type="button"
