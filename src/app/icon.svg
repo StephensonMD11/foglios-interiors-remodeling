@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img">
+  <title>Foglio's</title>
+  <style>
+    .tile { fill: #0f1a22; }
+    .letter { fill: #faf8f4; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #faf8f4; }
+      .letter { fill: #a67c52; }
+    }
+  </style>
+  <rect class="tile" width="32" height="32" rx="7"/>
+  <path class="letter" d="M7.6 25.6H16V23.6H13.8V16.7H20.6V14.6H13.8V8.7H22V10.9H23.8V6.4H7.6V8.4H9.8V23.6H7.6Z"/>
+</svg>
